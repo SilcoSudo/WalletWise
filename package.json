@@ -1,0 +1,36 @@
+{
+  "name": "fetest-expense",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Expense Management App - Full Stack",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"yarn start:backend\" \"yarn start:frontend\"",
+    "start:backend": "cd backend && yarn start",
+    "start:frontend": "cd frontend && yarn start",
+    "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
+    "dev:backend": "cd backend && yarn dev",
+    "dev:frontend": "cd frontend && yarn start",
+    "install:all": "yarn install && cd backend && yarn install && cd ../frontend && yarn install",
+    "build": "cd frontend && yarn build",
+    "test": "cd backend && yarn test && cd ../frontend && yarn test"
+  },
+  "keywords": [
+    "expense",
+    "management",
+    "react-native",
+    "expo",
+    "nodejs",
+    "mongodb",
+    "fullstack"
+  ],
+  "author": "Truong Phu Quy",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
