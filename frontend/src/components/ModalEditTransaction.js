@@ -1,0 +1,272 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import { LinearGradient } from "expo-linear-gradient";
+import { categories } from "../utils/constants";
+
+const ModalEditTransaction = ({
+  visible,
+  onClose,
+  transaction,
+  onUpdateTransaction,
+  onDeleteTransaction,
+  isDarkMode,
+}) => {
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (transaction) {
+      setAmount(transaction.amount.toString());
+      setDescription(transaction.description || "");
+      setSelectedCategory(transaction.category || "");
+    }
+  }, [transaction]);
+
+  const handleUpdate = async () => {
+    if (!amount || !description || !selectedCategory) {
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      Alert.alert("Lỗi", "Số tiền không hợp lệ");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onUpdateTransaction(transaction.id, {
+        amount: numAmount,
+        description,
+        category: selectedCategory,
+        type: transaction.type, // không cho đổi loại
+        date: transaction.date || new Date(),
+      });
+      onClose();
+    } catch (err) {
+      console.error("Error updating transaction:", err);
+      Alert.alert("Lỗi", "Không thể cập nhật giao dịch");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = () => {
+    Alert.alert("Xoá giao dịch", "Bạn có chắc muốn xoá giao dịch này?", [
+      { text: "Huỷ", style: "cancel" },
+      {
+        text: "Xoá",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await onDeleteTransaction(transaction.id);
+            onClose();
+          } catch (err) {
+            Alert.alert("Lỗi", "Không thể xoá giao dịch");
+          }
+        },
+      },
+    ]);
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <View
+        className={`flex-1 justify-end ${
+          isDarkMode ? "bg-black/50" : "bg-black/30"
+        }`}
+      >
+        <View
+          className={`${
+            isDarkMode ? "bg-gray-800" : "bg-white"
+          } rounded-t-3xl max-h-3/4`}
+        >
+          <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
+            <Text
+              className={`text-xl font-bold ${
+                isDarkMode ? "text-white" : "text-gray-800"
+              }`}
+            >
+              Sửa giao dịch
+            </Text>
+            <TouchableOpacity onPress={onClose}>
+              <Icon
+                name="times"
+                size={24}
+                color={isDarkMode ? "#9ca3af" : "#6b7280"}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView className="p-6" showsVerticalScrollIndicator={false}>
+            {/* Số tiền */}
+            <View className="mb-6">
+              <Text
+                className={`text-lg font-semibold mb-3 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Số tiền
+              </Text>
+              <View
+                className={`flex-row items-center border rounded-lg px-3 py-3 ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
+              >
+                <Icon
+                  name="money-bill-wave"
+                  size={20}
+                  color={isDarkMode ? "#9ca3af" : "#6b7280"}
+                  className="mr-3"
+                />
+                <TextInput
+                  value={amount}
+                  onChangeText={setAmount}
+                  placeholder="Nhập số tiền"
+                  placeholderTextColor={isDarkMode ? "#9ca3af" : "#9ca3af"}
+                  className={`flex-1 text-lg ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                  keyboardType="numeric"
+                />
+                <Text
+                  className={`text-lg ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  VNĐ
+                </Text>
+              </View>
+            </View>
+
+            {/* Mô tả */}
+            <View className="mb-6">
+              <Text
+                className={`text-lg font-semibold mb-3 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Mô tả
+              </Text>
+              <View
+                className={`border rounded-lg px-3 py-3 ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
+              >
+                <TextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Nhập mô tả giao dịch"
+                  placeholderTextColor={isDarkMode ? "#9ca3af" : "#9ca3af"}
+                  className={`text-base ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+            </View>
+
+            {/* Danh mục (giống modal add) */}
+            <View className="mb-6">
+              <Text
+                className={`text-lg font-semibold mb-3 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Danh mục
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {categories.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    onPress={() => setSelectedCategory(category.name)}
+                    className={`mr-3 p-3 rounded-lg border-2 ${
+                      selectedCategory === category.name
+                        ? "border-blue-500 bg-blue-50"
+                        : isDarkMode
+                        ? "border-gray-600 bg-gray-700"
+                        : "border-gray-300 bg-gray-50"
+                    }`}
+                  >
+                    <View className="items-center">
+                      <View
+                        className={`w-10 h-10 rounded-full ${category.color} items-center justify-center mb-2`}
+                      >
+                        <Icon
+                          name={category.icon}
+                          size={18}
+                          className={category.iconColor}
+                        />
+                      </View>
+                      <Text
+                        className={`text-xs text-center ${
+                          selectedCategory === category.name
+                            ? "text-blue-600 font-medium"
+                            : isDarkMode
+                            ? "text-gray-300"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {category.name}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Nút lưu */}
+            <TouchableOpacity
+              onPress={handleUpdate}
+              disabled={loading}
+              className="mt-6"
+            >
+              <LinearGradient
+                colors={["#667eea", "#764ba2"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-lg py-4 items-center"
+              >
+                <Text className="text-white text-lg font-semibold">
+                  {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Nút xoá */}
+            <TouchableOpacity
+              onPress={handleDelete}
+              className="mt-4 items-center py-3 rounded-lg border border-red-500"
+            >
+              <Text className="text-red-500 font-semibold">Xoá giao dịch</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+export default ModalEditTransaction;
