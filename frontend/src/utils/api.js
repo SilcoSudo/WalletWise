@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = 'http://192.168.1.6:5000/api';
+const API_BASE_URL = "http://192.168.1.18:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -21,10 +21,10 @@ export const setAuthToken = (token) => {
 // Helper function to make API requests
 const apiRequest = async (endpoint, options = {}) => {
   const token = getAuthToken();
-  
+
   const config = {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
@@ -34,23 +34,25 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     console.log(`Making API request to: ${API_BASE_URL}${endpoint}`);
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    
+
     // Log response status
     console.log(`API response status: ${response.status}`);
-    
+
     const data = await response.json();
     console.log(`API response data:`, data);
-    
+
     if (!response.ok) {
-      throw new Error(data.message || 'API request failed');
+      throw new Error(data.message || "API request failed");
     }
-    
+
     return data;
   } catch (error) {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     // If it's a network error, provide a more helpful message
-    if (error.message.includes('Network request failed')) {
-      throw new Error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và đảm bảo máy chủ đang chạy.');
+    if (error.message.includes("Network request failed")) {
+      throw new Error(
+        "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và đảm bảo máy chủ đang chạy."
+      );
     }
     throw error;
   }
@@ -58,53 +60,59 @@ const apiRequest = async (endpoint, options = {}) => {
 
 // Auth API
 export const authAPI = {
-  register: (userData) => 
-    apiRequest('/auth/register', {
-      method: 'POST',
+  register: (userData) =>
+    apiRequest("/auth/register", {
+      method: "POST",
       body: JSON.stringify(userData),
     }),
-  
-  login: (credentials) => 
-    apiRequest('/auth/login', {
-      method: 'POST',
+
+  login: (credentials) =>
+    apiRequest("/auth/login", {
+      method: "POST",
       body: JSON.stringify(credentials),
     }),
-  
-  guestLogin: () => 
-    apiRequest('/auth/guest', {
-      method: 'POST',
+
+  guestLogin: () =>
+    apiRequest("/auth/guest", {
+      method: "POST",
     }),
 };
 
 // Transactions API
 export const transactionsAPI = {
-  getAll: () => apiRequest('/transactions'),
-  
-  create: (transactionData) => 
-    apiRequest('/transactions', {
-      method: 'POST',
+  getAll: () => apiRequest("/transactions"),
+
+  create: (transactionData) =>
+    apiRequest("/transactions", {
+      method: "POST",
       body: JSON.stringify(transactionData),
     }),
-  
-  update: (id, transactionData) => 
+
+  update: (id, transactionData) =>
     apiRequest(`/transactions/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(transactionData),
     }),
-  
-  delete: (id) => 
+
+  delete: (id) =>
     apiRequest(`/transactions/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     }),
 };
 
 // Stats API
 export const statsAPI = {
-  getStats: () => apiRequest('/stats'),
+  getStats: () => apiRequest("/stats"),
+};
+
+// Categories API
+export const categoriesAPI = {
+  getAll: () => apiRequest("/categories"),
 };
 
 export default {
   auth: authAPI,
   transactions: transactionsAPI,
   stats: statsAPI,
+  categories: categoriesAPI,
 };
