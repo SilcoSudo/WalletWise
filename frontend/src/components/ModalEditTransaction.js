@@ -11,6 +11,8 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 import { categories } from "../utils/constants";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Platform } from "react-native";
 
 const ModalEditTransaction = ({
   visible,
@@ -23,13 +25,25 @@ const ModalEditTransaction = ({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [type, setType] = useState("");
   const [loading, setLoading] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
 
   useEffect(() => {
     if (transaction) {
       setAmount(transaction.amount.toString());
       setDescription(transaction.description || "");
       setSelectedCategory(transaction.category || "");
+      setType(transaction.type || "");
+      setDate(transaction.date ? new Date(transaction.date) : new Date());
     }
   }, [transaction]);
 
@@ -51,8 +65,8 @@ const ModalEditTransaction = ({
         amount: numAmount,
         description,
         category: selectedCategory,
-        type: transaction.type, // không cho đổi loại
-        date: transaction.date || new Date(),
+        type,
+        date,
       });
       onClose();
     } catch (err) {
@@ -98,6 +112,7 @@ const ModalEditTransaction = ({
             isDarkMode ? "bg-gray-800" : "bg-white"
           } rounded-t-3xl max-h-3/4`}
         >
+          {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
             <Text
               className={`text-xl font-bold ${
@@ -116,7 +131,128 @@ const ModalEditTransaction = ({
           </View>
 
           <ScrollView className="p-6" showsVerticalScrollIndicator={false}>
-            {/* Số tiền */}
+            {/* Transaction Type */}
+            <View className="mb-6">
+              <Text
+                className={`text-lg font-semibold mb-3 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Loại giao dịch
+              </Text>
+              <View className="flex-row space-x-3">
+                <TouchableOpacity
+                  onPress={() => setType("expense")}
+                  className={`flex-1 py-3 rounded-lg border-2 ${
+                    type === "expense"
+                      ? "border-red-500 bg-red-50"
+                      : isDarkMode
+                      ? "border-gray-600 bg-gray-700"
+                      : "border-gray-300 bg-gray-50"
+                  }`}
+                >
+                  <View className="items-center">
+                    <Icon
+                      name="arrow-up"
+                      size={20}
+                      color={
+                        type === "expense"
+                          ? "#ef4444"
+                          : isDarkMode
+                          ? "#9ca3af"
+                          : "#6b7280"
+                      }
+                    />
+                    <Text
+                      className={`mt-1 font-medium ${
+                        type === "expense"
+                          ? "text-red-600"
+                          : isDarkMode
+                          ? "text-gray-300"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      Chi tiêu
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setType("income")}
+                  className={`flex-1 py-3 rounded-lg border-2 ${
+                    type === "income"
+                      ? "border-green-500 bg-green-50"
+                      : isDarkMode
+                      ? "border-gray-600 bg-gray-700"
+                      : "border-gray-300 bg-gray-50"
+                  }`}
+                >
+                  <View className="items-center">
+                    <Icon
+                      name="arrow-down"
+                      size={20}
+                      color={
+                        type === "income"
+                          ? "#10b981"
+                          : isDarkMode
+                          ? "#9ca3af"
+                          : "#6b7280"
+                      }
+                    />
+                    <Text
+                      className={`mt-1 font-medium ${
+                        type === "income"
+                          ? "text-green-600"
+                          : isDarkMode
+                          ? "text-gray-300"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      Thu nhập
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Ngày giao dịch */}
+            <View className="mb-6">
+              <Text
+                className={`text-lg font-semibold mb-3 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Ngày giao dịch
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                className={`border rounded-lg px-3 py-3 ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
+              >
+                <Text
+                  className={`text-base ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  {date.toISOString().split("T")[0]} {/* yyyy-mm-dd */}
+                </Text>
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={onChangeDate}
+                  maximumDate={new Date()}
+                />
+              )}
+            </View>
+
+            {/* Amount */}
             <View className="mb-6">
               <Text
                 className={`text-lg font-semibold mb-3 ${
@@ -158,7 +294,7 @@ const ModalEditTransaction = ({
               </View>
             </View>
 
-            {/* Mô tả */}
+            {/* Description */}
             <View className="mb-6">
               <Text
                 className={`text-lg font-semibold mb-3 ${
@@ -188,7 +324,7 @@ const ModalEditTransaction = ({
               </View>
             </View>
 
-            {/* Danh mục (giống modal add) */}
+            {/* Categories */}
             <View className="mb-6">
               <Text
                 className={`text-lg font-semibold mb-3 ${
@@ -237,7 +373,7 @@ const ModalEditTransaction = ({
               </ScrollView>
             </View>
 
-            {/* Nút lưu */}
+            {/* Save Button */}
             <TouchableOpacity
               onPress={handleUpdate}
               disabled={loading}
@@ -255,7 +391,7 @@ const ModalEditTransaction = ({
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Nút xoá */}
+            {/* Delete Button */}
             <TouchableOpacity
               onPress={handleDelete}
               className="mt-4 items-center py-3 rounded-lg border border-red-500"

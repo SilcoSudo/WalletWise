@@ -153,61 +153,65 @@ const TransactionsScreen = ({ isDarkMode = false }) => {
         {/* Summary Cards */}
         <View className="px-4 mb-4">
           <View className="flex-row space-x-3">
-            <View
-              className={`flex-1 p-3 rounded-lg ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } shadow-sm`}
-            >
-              <View className="flex-row items-center">
-                <View className="w-8 h-8 rounded-full bg-green-100 items-center justify-center mr-2">
-                  <Icon name="arrow-down" size={14} color="#10b981" />
-                </View>
-                <View>
-                  <Text
-                    className={`text-xs ${
-                      isDarkMode ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    Thu nhập
-                  </Text>
-                  <Text
-                    className={`font-medium ${
-                      isDarkMode ? "text-white" : "text-gray-800"
-                    }`}
-                  >
-                    {formatCurrency(totalIncome)}
-                  </Text>
+            {activeTab !== "expense" && (
+              <View
+                className={`flex-1 p-3 rounded-lg ${
+                  isDarkMode ? "bg-gray-800" : "bg-white"
+                } shadow-sm`}
+              >
+                <View className="flex-row items-center">
+                  <View className="w-8 h-8 rounded-full bg-green-100 items-center justify-center mr-2">
+                    <Icon name="arrow-down" size={14} color="#10b981" />
+                  </View>
+                  <View>
+                    <Text
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
+                      Thu nhập
+                    </Text>
+                    <Text
+                      className={`font-medium ${
+                        isDarkMode ? "text-white" : "text-gray-800"
+                      }`}
+                    >
+                      {formatCurrency(totalIncome)}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
+            )}
 
-            <View
-              className={`flex-1 p-3 rounded-lg ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } shadow-sm`}
-            >
-              <View className="flex-row items-center">
-                <View className="w-8 h-8 rounded-full bg-red-100 items-center justify-center mr-2">
-                  <Icon name="arrow-up" size={14} color="#ef4444" />
-                </View>
-                <View>
-                  <Text
-                    className={`text-xs ${
-                      isDarkMode ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    Chi tiêu
-                  </Text>
-                  <Text
-                    className={`font-medium ${
-                      isDarkMode ? "text-white" : "text-gray-800"
-                    }`}
-                  >
-                    {formatCurrency(totalExpense)}
-                  </Text>
+            {activeTab !== "income" && (
+              <View
+                className={`flex-1 p-3 rounded-lg ${
+                  isDarkMode ? "bg-gray-800" : "bg-white"
+                } shadow-sm`}
+              >
+                <View className="flex-row items-center">
+                  <View className="w-8 h-8 rounded-full bg-red-100 items-center justify-center mr-2">
+                    <Icon name="arrow-up" size={14} color="#ef4444" />
+                  </View>
+                  <View>
+                    <Text
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
+                      Chi tiêu
+                    </Text>
+                    <Text
+                      className={`font-medium ${
+                        isDarkMode ? "text-white" : "text-gray-800"
+                      }`}
+                    >
+                      {formatCurrency(totalExpense)}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
+            )}
           </View>
         </View>
 
