@@ -2,6 +2,26 @@ import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { transactionsAPI, statsAPI } from '../utils/api';
 import { useAuth } from './useAuth';
+import React, { createContext, useContext } from 'react';
+
+// ===================== HOOK QUẢN LÝ GIAO DỊCH =====================
+// File này định nghĩa context, provider và các hàm thao tác với giao dịch, thống kê cho toàn app.
+
+// Tạo context
+const TransactionsContext = createContext();
+
+export function TransactionsProvider({ children }) {
+  const transactionsHook = useTransactions();
+  return (
+    <TransactionsContext.Provider value={transactionsHook}>
+      {children}
+    </TransactionsContext.Provider>
+  );
+}
+
+export function useTransactionsContext() {
+  return useContext(TransactionsContext);
+}
 
 export const useTransactions = () => {
   const { isAuthenticated } = useAuth();
@@ -14,8 +34,6 @@ export const useTransactions = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Load transactions from API
   const loadTransactions = useCallback(async () => {
     try {
       setLoading(true);
@@ -36,6 +54,22 @@ export const useTransactions = () => {
     }
   }, []);
 
+  // Hàm tính stats từ transactions
+  function calcStats(transactions) {
+    const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const balance = totalIncome + totalExpense;
+    const categoryStats = {};
+    transactions.forEach(t => {
+      if (t.type === 'expense') {
+        const category = t.category;
+        if (!categoryStats[category]) categoryStats[category] = 0;
+        categoryStats[category] += Math.abs(t.amount);
+      }
+    });
+    return { balance, totalIncome, totalExpense, categoryStats };
+  }
+
   // Add transaction using API
   const addTransaction = useCallback(async (transactionData) => {
     try {
@@ -45,11 +79,11 @@ export const useTransactions = () => {
       const newTransaction = await transactionsAPI.create(transactionData);
       
       // Add to local state
-      setTransactions(prev => [newTransaction, ...prev]);
-      
-      // Reload stats
-      const statsData = await statsAPI.getStats();
-      setStats(statsData);
+      setTransactions(prev => {
+        const updated = [newTransaction, ...prev];
+        setStats(calcStats(updated));
+        return updated;
+      });
       
       return newTransaction;
     } catch (err) {

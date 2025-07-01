@@ -12,6 +12,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { categories } from '../utils/constants';
 
+// ===================== MODAL THÊM GIAO DỊCH =====================
+// Component này hiển thị form để người dùng nhập thông tin giao dịch mới (loại, số tiền, mô tả, danh mục).
+// Nhận các props: visible (hiện/ẩn modal), onClose (đóng modal), onAddTransaction (hàm thêm giao dịch).
 const ModalAddTransaction = ({
   isDarkMode = false,
   visible = false,
@@ -25,8 +28,17 @@ const ModalAddTransaction = ({
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
-    if (!amount || !description || !selectedCategory) {
+    if (!amount || !description) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+      return;
+    }
+
+    // Nếu là thu nhập và chưa chọn danh mục, tự động set danh mục mặc định
+    let finalCategory = selectedCategory;
+    if (type === 'income' && !selectedCategory) {
+      finalCategory = 'Lương';
+    } else if (type === 'expense' && !selectedCategory) {
+      Alert.alert('Lỗi', 'Vui lòng chọn danh mục');
       return;
     }
 
@@ -40,17 +52,17 @@ const ModalAddTransaction = ({
       setLoading(true);
       await onAddTransaction({
         type,
-        category: selectedCategory,
+        category: finalCategory,
         amount: numAmount,
         description,
         date: new Date()
       });
-      
       // Reset form
       setAmount('');
       setDescription('');
       setSelectedCategory('');
       setType('expense');
+      onClose(); // Đóng modal ngay sau khi lưu thành công
     } catch (error) {
       console.error('Failed to add transaction:', error);
       Alert.alert('Lỗi', 'Không thể thêm giao dịch');
@@ -194,7 +206,7 @@ const ModalAddTransaction = ({
             </View>
 
             {/* Category Selection - Only show for expense */}
-            {type === 'expense' && (
+            {type === 'expense' ? (
               <View className="mb-6">
                 <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
                   Danh mục
@@ -224,6 +236,42 @@ const ModalAddTransaction = ({
                             : isDarkMode ? 'text-gray-300' : 'text-gray-600'
                         }`}>
                           {category.name}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : (
+              <View className="mb-6">
+                <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                  Danh mục thu nhập
+                </Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  className="flex-row"
+                >
+                  {['Lương', 'Thưởng', 'Đầu tư', 'Khác'].map((category) => (
+                    <TouchableOpacity
+                      key={category}
+                      onPress={() => setSelectedCategory(category)}
+                      className={`mr-3 p-3 rounded-lg border-2 ${
+                        selectedCategory === category
+                          ? 'border-green-500 bg-green-50'
+                          : isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'
+                      }`}
+                    >
+                      <View className="items-center">
+                        <View className={`w-10 h-10 rounded-full bg-green-100 items-center justify-center mb-2`}>
+                          <Icon name="money-bill-wave" size={18} className="text-green-500" />
+                        </View>
+                        <Text className={`text-xs text-center ${
+                          selectedCategory === category
+                            ? 'text-green-600 font-medium'
+                            : isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {category}
                         </Text>
                       </View>
                     </TouchableOpacity>

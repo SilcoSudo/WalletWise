@@ -1,3 +1,6 @@
+// ===================== HÀM GỌI API =====================
+// File này định nghĩa các hàm gọi API backend cho các chức năng xác thực, giao dịch, thống kê.
+
 // API Configuration
 // Update this URL based on your environment:
 // - For Android emulator: 'http://10.0.2.2:5000/api'
@@ -5,7 +8,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = 'http://192.168.1.6:5000/api';
+const API_BASE_URL = 'http://192.168.88.144:5000/api';
 
 // Helper function to get auth token
 const getAuthToken = () => {

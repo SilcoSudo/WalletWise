@@ -3,6 +3,9 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { formatCurrency } from '../utils/format';
 
+// ===================== THẺ GIAO DỊCH =====================
+// Component này hiển thị thông tin từng giao dịch (dùng trong danh sách giao dịch, modal, v.v.)
+
 const TransactionCard = ({ 
   transaction, 
   isDarkMode = false,

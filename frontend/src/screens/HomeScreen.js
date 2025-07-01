@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -8,7 +8,8 @@ import { formatCurrency } from '../utils/format';
 import { categories } from '../utils/constants';
 import CategoryBadge from '../components/CategoryBadge';
 import TransactionCard from '../components/TransactionCard';
-import { useTransactions } from '../hooks/useTransactions';
+import { useTransactionsContext } from '../hooks/useTransactions';
+import Modal from 'react-native-modal';
 
 const HomeScreen = ({ 
   isDarkMode = false,
@@ -16,10 +17,25 @@ const HomeScreen = ({
   onAddTransaction 
 }) => {
   const selectedDate = new Date();
-  const { transactions, stats, loading, error } = useTransactions();
+  const { transactions, stats, loading, error } = useTransactionsContext();
   
   // Get recent transactions
   const recentTransactions = transactions.slice(0, 10);
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  // Lọc giao dịch theo danh mục đang chọn
+  const categoryTransactions = selectedCategory
+    ? transactions.filter(t => t.category === selectedCategory.name)
+    : [];
+
+  // Modal hiển thị chi tiết giao dịch
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [transactionModalVisible, setTransactionModalVisible] = useState(false);
+
+  // State để kiểm soát việc ẩn/hiện số dư
+  const [showBalance, setShowBalance] = useState(true);
 
   if (loading && transactions.length === 0) {
     return (
@@ -51,7 +67,11 @@ const HomeScreen = ({
       className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
       showsVerticalScrollIndicator={false}
     >
-      {/* Balance Card */}
+      {/* ===================== MÀN HÌNH TRANG CHỦ ===================== */}
+      {/* Đây là màn hình chính hiển thị số dư, thu nhập, chi tiêu, giao dịch gần đây và cho phép xem giao dịch theo danh mục. */}
+      {/* Sử dụng context để lấy dữ liệu giao dịch và thống kê, đồng thời hỗ trợ ẩn/hiện số dư bằng icon con mắt. */}
+      {/* ===================== THẺ SỐ DƯ ===================== */}
+      {/* Hiển thị số dư hiện tại, thu nhập, chi tiêu */}
       <View className="p-4">
         <LinearGradient
           colors={['#667eea', '#764ba2']}
@@ -61,58 +81,32 @@ const HomeScreen = ({
         >
           <View className="flex-row items-center justify-between mb-4">
             <Text className="text-white/80 text-sm">Số dư hiện tại</Text>
-            <TouchableOpacity>
-              <Icon name="eye" size={16} color="white" />
+            <TouchableOpacity onPress={() => setShowBalance(v => !v)}>
+              <Icon name={showBalance ? 'eye' : 'eye-slash'} size={16} color="white" />
             </TouchableOpacity>
           </View>
           
           <Text className="text-3xl font-bold text-white mb-2">
-            {formatCurrency(stats.balance)}
+            {showBalance ? formatCurrency(stats.balance) : '******'}
           </Text>
           
           <View className="flex-row justify-between">
             <View className="items-center">
               <Icon name="arrow-down" size={16} color="#10b981" />
               <Text className="text-white/80 text-xs mt-1">Thu nhập</Text>
-              <Text className="text-white font-medium">{formatCurrency(stats.totalIncome)}</Text>
+              <Text className="text-white font-medium">{showBalance ? formatCurrency(stats.totalIncome) : '******'}</Text>
             </View>
             <View className="items-center">
               <Icon name="arrow-up" size={16} color="#ef4444" />
               <Text className="text-white/80 text-xs mt-1">Chi tiêu</Text>
-              <Text className="text-white font-medium">{formatCurrency(stats.totalExpense)}</Text>
+              <Text className="text-white font-medium">{showBalance ? formatCurrency(stats.totalExpense) : '******'}</Text>
             </View>
           </View>
         </LinearGradient>
       </View>
 
-      {/* Quick Actions
-      <View className="px-4 mb-6">
-        <Text className={`text-lg font-semibold mb-3 ${
-          isDarkMode ? 'text-white' : 'text-gray-800'
-        }`}>
-          Thao tác nhanh
-        </Text>
-        <View className="flex-row justify-between">
-          <TouchableOpacity 
-            onPress={onAddTransaction}
-            className="flex-1 bg-white rounded-lg p-4 mr-2 shadow-sm border border-gray-100"
-          >
-            <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mb-2">
-              <Icon name="plus" size={20} color="#2563eb" />
-            </View>
-            <Text className="text-sm font-medium text-gray-800">Thêm giao dịch</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity className="flex-1 bg-white rounded-lg p-4 ml-2 shadow-sm border border-gray-100">
-            <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center mb-2">
-              <Icon name="chart-pie" size={20} color="#10b981" />
-            </View>
-            <Text className="text-sm font-medium text-gray-800">Xem thống kê</Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
-
-      {/* Categories */}
+      {/* ===================== DANH MỤC CHI TIÊU ===================== */}
+      {/* Hiển thị các danh mục, nhấn vào để xem giao dịch theo danh mục */}
       <View className="px-4 mb-6">
         <View className="flex-row items-center justify-between mb-3">
           <Text className={`text-lg font-semibold ${
@@ -127,17 +121,26 @@ const HomeScreen = ({
         
         <View className="flex-row flex-wrap justify-between">
           {categories.map((category) => (
-            <View key={category.id} className="items-center mb-4" style={{ width: '22%' }}>
+            <TouchableOpacity
+              key={category.id}
+              className="items-center mb-4"
+              style={{ width: '22%' }}
+              onPress={() => {
+                setSelectedCategory(category);
+                setModalVisible(true);
+              }}
+            >
               <View className={`w-12 h-12 rounded-full ${category.color} items-center justify-center mb-2`}>
                 <Icon name={category.icon} size={18} className={category.iconColor} />
               </View>
               <Text className="text-xs text-center text-gray-600">{category.name}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {/* Recent Transactions */}
+      {/* ===================== GIAO DỊCH GẦN ĐÂY ===================== */}
+      {/* Hiển thị danh sách 10 giao dịch gần nhất */}
       <View className="px-4 mb-20">
         <View className="flex-row items-center justify-between mb-3">
           <Text className={`text-lg font-semibold ${
@@ -167,11 +170,69 @@ const HomeScreen = ({
                 key={transaction.id}
                 transaction={transaction}
                 isDarkMode={isDarkMode}
+                onPress={() => {
+                  setSelectedTransaction(transaction);
+                  setTransactionModalVisible(true);
+                }}
               />
             ))}
           </View>
         )}
       </View>
+
+      {/* ===================== MODAL XEM GIAO DỊCH THEO DANH MỤC ===================== */}
+      <Modal isVisible={isModalVisible} onBackdropPress={() => setModalVisible(false)}>
+        <View className={`bg-white rounded-2xl p-4 max-h-[70%] ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+          <Text className={`text-lg font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+            Giao dịch: {selectedCategory ? selectedCategory.name : ''}
+          </Text>
+          {categoryTransactions.length === 0 ? (
+            <Text className="text-center text-gray-500">Chưa có giao dịch nào</Text>
+          ) : (
+            <ScrollView style={{ maxHeight: 300 }}>
+              {categoryTransactions.map((transaction) => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  isDarkMode={isDarkMode}
+                  onPress={() => {
+                    setSelectedTransaction(transaction);
+                    setTransactionModalVisible(true);
+                  }}
+                />
+              ))}
+            </ScrollView>
+          )}
+          <TouchableOpacity
+            className="mt-4 py-2 px-4 bg-blue-600 rounded-lg"
+            onPress={() => setModalVisible(false)}
+          >
+            <Text className="text-white text-center font-semibold">Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* ===================== MODAL CHI TIẾT GIAO DỊCH ===================== */}
+      <Modal isVisible={transactionModalVisible} onBackdropPress={() => setTransactionModalVisible(false)}>
+        <View className={`bg-white rounded-2xl p-4 max-w-[90%] ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+          <Text className={`text-lg font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Chi tiết giao dịch</Text>
+          {selectedTransaction && (
+            <>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Mô tả: {selectedTransaction.description}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Số tiền: {selectedTransaction.type === 'income' ? '+' : '-'}{formatCurrency(selectedTransaction.amount)}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Loại: {selectedTransaction.type === 'income' ? 'Thu nhập' : 'Chi tiêu'}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Danh mục: {selectedTransaction.category}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Ngày: {new Date(selectedTransaction.date).toLocaleDateString()}</Text>
+            </>
+          )}
+          <TouchableOpacity
+            className="mt-4 py-2 px-4 bg-blue-600 rounded-lg"
+            onPress={() => setTransactionModalVisible(false)}
+          >
+            <Text className="text-white text-center font-semibold">Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };

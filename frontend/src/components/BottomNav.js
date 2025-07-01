@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { bottomNavItems } from '../utils/constants';
 
+// ===================== THANH ĐIỀU HƯỚNG DƯỚI =====================
+// Component này hiển thị các tab và nút thêm giao dịch ở phía dưới màn hình.
 const BottomNav = ({ 
   activeScreen, 
   onNavigate, 

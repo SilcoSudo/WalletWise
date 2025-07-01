@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { useAuth } from '../hooks/useAuth';
@@ -8,44 +8,70 @@ import HomeScreen from '../screens/HomeScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Tab = createBottomTabNavigator();
 
-// Tab Navigator
-const TabNavigator = () => {
+// ===================== ĐIỀU HƯỚNG CHÍNH (NAVIGATION) =====================
+// File này định nghĩa cấu trúc điều hướng chính của app, custom tab bar với nút cộng nổi giữa, truyền hàm thêm giao dịch toàn cục.
+
+// Custom Tab Bar với nút + ở giữa
+function CustomTabBar({ state, descriptors, navigation, onAddTransaction }) {
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          if (route.name === 'Home') {
-            iconName = 'home';
-          } else if (route.name === 'Transactions') {
-            iconName = 'list';
-          } else if (route.name === 'Statistics') {
-            iconName = 'chart-bar';
-          } else if (route.name === 'Settings') {
-            iconName = 'cog';
-          }
-
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: 'gray',
-        headerShown: false,
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Transactions" component={TransactionsScreen} />
-      <Tab.Screen name="Statistics" component={StatisticsScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-    </Tab.Navigator>
+    <View style={{ height: 72, backgroundColor: '#fff', borderTopWidth: 1, borderColor: '#e5e7eb' }}>
+      {/* Nút cộng nổi giữa */}
+      <View style={{ position: 'absolute', alignSelf: 'center', bottom: 16, zIndex: 10 }}>
+        <LinearGradient
+          colors={['#667eea', '#764ba2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, borderWidth: 4, borderColor: '#fff' }}
+        >
+          <TouchableOpacity onPress={onAddTransaction} style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="plus" size={32} color="#fff" />
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+      {/* Các tab chia đều hai bên */}
+      <View style={{ flexDirection: 'row', height: 72, alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 }}>
+        {state.routes.map((route, index) => {
+          // Bỏ tab Add khỏi tab bar (nút cộng đã custom riêng)
+          if (route.name === 'Add') return null;
+          const { options } = descriptors[route.key];
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+              ? options.title
+              : route.name;
+          const isFocused = state.index === index;
+          let iconName = 'home';
+          if (route.name === 'Home') iconName = 'home';
+          if (route.name === 'Transactions') iconName = 'list';
+          if (route.name === 'Statistics') iconName = 'chart-bar';
+          if (route.name === 'Settings') iconName = 'cog';
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+              onPress={() => navigation.navigate(route.name)}
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name={iconName} size={22} color={isFocused ? '#2563eb' : '#6b7280'} />
+              <Text style={{ color: isFocused ? '#2563eb' : '#6b7280', fontSize: 12, marginTop: 2 }}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
   );
-};
+}
 
 // Main App Navigator
-const AppNavigator = () => {
+const AppNavigator = ({ onAddTransaction }) => {
   const { user, logout } = useAuth();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [activeScreen, setActiveScreen] = useState('Home');
@@ -68,7 +94,7 @@ const AppNavigator = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <TabNavigator />
+      <TabNavigator onAddTransaction={onAddTransaction} />
       
       {/* Global Drawer */}
       <Drawer
@@ -80,6 +106,21 @@ const AppNavigator = () => {
         user={user}
       />
     </View>
+  );
+};
+
+const TabNavigator = ({ onAddTransaction }) => {
+  return (
+    <Tab.Navigator
+      tabBar={props => <CustomTabBar {...props} onAddTransaction={onAddTransaction} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Trang chủ' }} />
+      <Tab.Screen name="Add" component={() => null} options={{ tabBarLabel: '' }} listeners={{ tabPress: e => e.preventDefault() }} />
+      <Tab.Screen name="Transactions" component={TransactionsScreen} options={{ tabBarLabel: 'Giao dịch' }} />
+      <Tab.Screen name="Statistics" component={StatisticsScreen} options={{ tabBarLabel: 'Thống kê' }} />
+      <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: 'Cài đặt' }} />
+    </Tab.Navigator>
   );
 };
 

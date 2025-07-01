@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI } from '../utils/api';
 
+// ===================== HOOK QUẢN LÝ XÁC THỰC NGƯỜI DÙNG =====================
+// File này định nghĩa context, provider và các hàm thao tác đăng nhập, đăng ký, đăng xuất cho toàn app.
+
 // Create a context for the auth state
 const AuthContext = createContext();
 
