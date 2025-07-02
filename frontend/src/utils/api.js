@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://10.66.173.73:5000/api";
+const API_BASE_URL = "http://192.168.1.23:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -110,9 +110,50 @@ export const categoriesAPI = {
   getAll: () => apiRequest("/categories"),
 };
 
+// Settings API
+export const settingsAPI = {
+  getSettings: () => apiRequest("/settings"),
+  
+  updateLanguage: (language) =>
+    apiRequest("/settings/language", {
+      method: "PUT",
+      body: JSON.stringify({ language }),
+    }),
+  
+  updateNotifications: (enabled) =>
+    apiRequest("/settings/notifications", {
+      method: "PUT",
+      body: JSON.stringify({ enabled }),
+    }),
+};
+
+// Profile API
+export const profileAPI = {
+  getProfile: () => apiRequest("/profile"),
+  
+  updateProfile: (profileData) =>
+    apiRequest("/profile", {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    }),
+  
+  changePassword: (passwordData) =>
+    apiRequest("/profile/change-password", {
+      method: "PUT",
+      body: JSON.stringify(passwordData),
+    }),
+  
+  deleteAccount: () =>
+    apiRequest("/profile", {
+      method: "DELETE",
+    }),
+};
+
 export default {
   auth: authAPI,
   transactions: transactionsAPI,
   stats: statsAPI,
   categories: categoriesAPI,
+  settings: settingsAPI,
+  profile: profileAPI,
 };

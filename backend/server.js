@@ -10,6 +10,8 @@ const authRoutes = require('./src/routes/authRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
 const statsRoutes = require('./src/routes/statsRoutes');
+const settingsRoutes = require('./src/routes/settingsRoutes');
+const profileRoutes = require('./src/routes/profileRoutes');
 
 // Import middleware
 const errorHandler = require('./src/middleware/errorMiddleware');
@@ -34,6 +36,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
