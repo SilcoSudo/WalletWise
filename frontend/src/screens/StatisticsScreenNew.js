@@ -9,6 +9,10 @@ import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYea
 
 const { width } = Dimensions.get('window');
 
+// ===================== MÀN HÌNH THỐNG KÊ =====================
+// Màn hình này hiển thị các thống kê chi tiêu theo tuần, tháng, năm với biểu đồ tròn và biểu đồ cột.
+// Sử dụng context để lấy dữ liệu giao dịch, tính toán lại theo từng tab.
+
 const StatisticsScreen = ({ isDarkMode = false }) => {
   // State tab đang chọn: tuần/tháng/năm
   const [activeStatsTab, setActiveStatsTab] = useState('weekly');
@@ -54,7 +58,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
 
   // Tính tổng thu nhập và chi tiêu trong khoảng thời gian đã lọc
   const totalIncome = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   // Tính tổng chi tiêu theo từng danh mục
   const expenseTransactions = filteredTransactions.filter(t => t.type === 'expense');
@@ -69,12 +73,11 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
 
   // Chuẩn bị dữ liệu cho biểu đồ tròn (pie chart)
   const pieChartData = Object.entries(categoryData).map(([category, amount], index) => {
-    const categoryInfo = categories.find(c => c.id === category) || { name: category, icon: 'receipt' };
+    const categoryInfo = categories.find(c => c.name === category) || { name: category, icon: 'receipt' };
     const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'];
     return {
-      name: categoryInfo.name,
+      name: `${categoryInfo.name}: ${formatCurrency(amount)}`,
       amount: amount,
-      displayName: `${categoryInfo.name}: ${formatCurrency(amount)}`,
       color: colors[index % colors.length],
       legendFontColor: isDarkMode ? '#FFFFFF' : '#7F7F7F',
       legendFontSize: 12,
@@ -95,12 +98,20 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
       barData.push(dayExpense);
     }
   } else if (activeStatsTab === 'monthly') {
-    // Các ngày trong tháng
-    const daysInMonth = endOfMonth(now).getDate();
-    for (let i = 1; i <= daysInMonth; i++) {
-      barLabels.push(i.toString());
-      const dayExpense = filteredTransactions.filter(t => t.type === 'expense' && new Date(t.date).getDate() === i).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-      barData.push(dayExpense);
+    // Các ngày trong tháng (simplified to weeks for better readability)
+    barLabels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+    const monthStart = startOfMonth(now);
+    for (let i = 0; i < 4; i++) {
+      const weekStart = new Date(monthStart);
+      weekStart.setDate(weekStart.getDate() + (i * 7));
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      const weekExpense = filteredTransactions.filter(t => {
+        const date = new Date(t.date);
+        return t.type === 'expense' && date >= weekStart && date <= weekEnd;
+      }).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      barData.push(weekExpense);
     }
   } else if (activeStatsTab === 'yearly') {
     // 12 tháng
@@ -110,12 +121,13 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
       barData.push(monthExpense);
     }
   }
+
   // Dữ liệu cho BarChart
   const barChartData = {
     labels: barLabels,
     datasets: [
       {
-        data: barData,
+        data: barData.length > 0 ? barData : [0], // Ensure at least one data point
       },
     ],
   };
@@ -128,10 +140,17 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
     strokeWidth: 2,
     barPercentage: 0.5,
     useShadowColorFromDataset: false,
-    formatYLabel: (value) => formatCurrencyShort(Number(value)),
+    formatYLabel: (value) => {
+      // Simple short format for amounts
+      const num = Number(value);
+      if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+      if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+      return num.toFixed(0);
+    },
     formatXLabel: (value) => value,
   };
 
+  // Nếu đang loading dữ liệu
   if (loading && transactions.length === 0) {
     return (
       <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -142,6 +161,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
     );
   }
 
+  // Nếu có lỗi khi lấy dữ liệu
   if (error) {
     return (
       <View className={`flex-1 justify-center items-center p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -156,12 +176,13 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
     );
   }
 
+  // Giao diện chính của màn hình thống kê
   return (
     <ScrollView 
       className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
       showsVerticalScrollIndicator={false}
     >
-      {/* Stats Tabs */}
+      {/* Tabs chọn tuần/tháng/năm */}
       <View className="p-4">
         <View className={`flex-row rounded-lg p-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           {statsTabs.map((tab) => (
@@ -186,7 +207,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
         </View>
       </View>
 
-      {/* Summary Cards */}
+      {/* Thẻ tổng quan thu nhập/chi tiêu */}
       <View className="px-4 mb-6">
         <Text className={`text-lg font-semibold mb-3 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
@@ -195,96 +216,77 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
         </Text>
         
         <View className="flex-row space-x-3">
+          {/* Thẻ thu nhập */}
           <View className={`flex-1 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <View className="flex-row items-center justify-between mb-2">
-              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Thu nhập
-              </Text>
+              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Thu nhập</Text>
               <Icon name="arrow-down" size={16} color="#10b981" />
             </View>
-            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              {formatCurrency(totalIncome)}
-            </Text>
+            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalIncome)}</Text>
           </View>
-          
+          {/* Thẻ chi tiêu */}
           <View className={`flex-1 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <View className="flex-row items-center justify-between mb-2">
-              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Chi tiêu
-              </Text>
+              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Chi tiêu</Text>
               <Icon name="arrow-up" size={16} color="#ef4444" />
             </View>
-            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              {formatCurrency(totalExpense)}
-            </Text>
+            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalExpense)}</Text>
           </View>
         </View>
       </View>
 
-      {/* Pie Chart */}
+      {/* Biểu đồ tròn: Chi tiêu theo danh mục */}
       <View className="px-4 mb-6">
         <Text className={`text-lg font-semibold mb-3 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
           Chi tiêu theo danh mục
         </Text>
-        
         <View className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           {pieChartData.length > 0 ? (
-            <View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               {/* Biểu đồ tròn */}
-              <PieChart
-                data={pieChartData}
-                width={width - 48}
-                height={220}
-                chartConfig={chartConfig}
-                accessor="amount"
-                backgroundColor="transparent"
-                paddingLeft="15"
-                absolute
-                hasLegend={false}
-              />
-              {/* Custom legend dưới biểu đồ */}
-              <View style={{ marginTop: 16 }}>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                  {pieChartData.map((item, idx) => (
-                    <View key={idx} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 8, paddingHorizontal: 4 }}>
-                      <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: item.color, marginRight: 8 }} />
-                      <Text style={{ color: isDarkMode ? '#fff' : '#444', fontSize: 12, flex: 1 }} numberOfLines={2}>
-                        {item.displayName}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
+              <View style={{ paddingLeft: 40 }}>
+                <PieChart
+                  data={pieChartData}
+                  width={width * 0.6}
+                  height={220}
+                  chartConfig={chartConfig}
+                  accessor="amount"
+                  backgroundColor="transparent"
+                  paddingLeft="0"
+                  absolute
+                  hasLegend={false}
+                />
+              </View>
+              {/* Custom legend bên phải biểu đồ */}
+              <View style={{ marginLeft: 24, justifyContent: 'center', height: 220 }}>
+                {pieChartData.slice(0, 5).map((item, idx) => (
+                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: item.color, marginRight: 8 }} />
+                    <Text style={{ color: isDarkMode ? '#fff' : '#444', fontSize: 12, flex: 1 }} numberOfLines={2}>{item.name}</Text>
+                  </View>
+                ))}
               </View>
             </View>
           ) : (
             <View className="items-center justify-center h-44">
-              <Icon 
-                name="chart-pie" 
-                size={48} 
-                color={isDarkMode ? '#4b5563' : '#d1d5db'} 
-              />
-              <Text className={`text-lg font-medium mt-4 ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>
-                Không có dữ liệu
-              </Text>
+              <Icon name="chart-pie" size={48} color={isDarkMode ? '#4b5563' : '#d1d5db'} />
+              <Text className={`text-lg font-medium mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Không có dữ liệu</Text>
             </View>
           )}
         </View>
       </View>
 
-      {/* Bar Chart */}
+      {/* Biểu đồ cột: Chi tiêu theo ngày/tuần/tháng */}
       <View className="px-4 mb-20">
         <Text className={`text-lg font-semibold mb-3 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
           {activeStatsTab === 'weekly' && 'Chi tiêu theo ngày trong tuần'}
-          {activeStatsTab === 'monthly' && 'Chi tiêu theo ngày'}
+          {activeStatsTab === 'monthly' && 'Chi tiêu theo tuần'}
           {activeStatsTab === 'yearly' && 'Chi tiêu theo tháng'}
         </Text>
-        
         <View className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           <BarChart
             data={barChartData}

@@ -9,7 +9,7 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { formatCurrency } from "../utils/format";
 import TransactionCard from "../components/TransactionCard";
-import { useTransactions } from "../hooks/useTransactions";
+import { useTransactionsContext } from "../hooks/useTransactions";
 import ModalEditTransaction from "../components/ModalEditTransaction";
 
 const TransactionsScreen = ({ isDarkMode = false }) => {
@@ -18,8 +18,7 @@ const TransactionsScreen = ({ isDarkMode = false }) => {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
-  const { transactions, loading, error, updateTransaction, deleteTransaction } =
-    useTransactions();
+  const { transactions, loading, error, updateTransaction, deleteTransaction } = useTransactionsContext();
 
   const tabs = [
     { key: "all", label: "Tất cả" },

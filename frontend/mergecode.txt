@@ -1,0 +1,1421 @@
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import { formatCurrency } from "../utils/format";
+import TransactionCard from "../components/TransactionCard";
+import { useTransactionsContext } from "../hooks/useTransactions";
+import ModalEditTransaction from "../components/ModalEditTransaction";
+
+const TransactionsScreen = ({ isDarkMode = false }) => {
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchText, setSearchText] = useState("");
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
+  const { transactions, loading, error, updateTransaction, deleteTransaction } = useTransactionsContext();
+
+  const tabs = [
+    { key: "all", label: "Tất cả" },
+    { key: "expense", label: "Chi tiêu" },
+    { key: "income", label: "Thu nhập" },
+  ];
+
+  const filteredTransactions = transactions.filter((transaction) => {
+    const matchesTab =
+      activeTab === "all" ||
+      (activeTab === "expense" && transaction.type === "expense") ||
+      (activeTab === "income" && transaction.type === "income");
+
+    const matchesSearch =
+      !searchText ||
+      (transaction.description &&
+        transaction.description
+          .toLowerCase()
+          .includes(searchText.toLowerCase()));
+
+    return matchesTab && matchesSearch;
+  });
+
+  const totalIncome = filteredTransactions
+    .filter((t) => t.type === "income")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalExpense = filteredTransactions
+    .filter((t) => t.type === "expense")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  if (loading && transactions.length === 0) {
+    return (
+      <View
+        className={`flex-1 justify-center items-center ${
+          isDarkMode ? "bg-gray-900" : "bg-gray-50"
+        }`}
+      >
+        <Text className={`${isDarkMode ? "text-white" : "text-gray-600"}`}>
+          Đang tải dữ liệu...
+        </Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View
+        className={`flex-1 justify-center items-center p-4 ${
+          isDarkMode ? "bg-gray-900" : "bg-gray-50"
+        }`}
+      >
+        <Icon name="exclamation-triangle" size={48} color="#ef4444" />
+        <Text
+          className={`text-lg font-semibold mt-4 text-center ${
+            isDarkMode ? "text-white" : "text-gray-800"
+          }`}
+        >
+          Lỗi tải dữ liệu
+        </Text>
+        <Text
+          className={`text-sm text-center mt-2 ${
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
+          {error}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <View className={`flex-1 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+        {/* Search Bar */}
+        <View className="p-4">
+          <View
+            className={`relative ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            } rounded-lg shadow-sm`}
+          >
+            <TextInput
+              value={searchText}
+              onChangeText={setSearchText}
+              placeholder="Tìm kiếm giao dịch..."
+              className={`p-3 pl-10 ${
+                isDarkMode ? "text-white" : "text-gray-800"
+              }`}
+              placeholderTextColor={isDarkMode ? "#9ca3af" : "#6b7280"}
+            />
+            <Icon
+              name="search"
+              size={16}
+              color={isDarkMode ? "#9ca3af" : "#6b7280"}
+              style={{ position: "absolute", left: 12, top: 12 }}
+            />
+          </View>
+        </View>
+
+        {/* Filter Tabs */}
+        <View className="px-4 mb-4">
+          <View
+            className={`flex-row rounded-lg p-1 ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            } shadow-sm`}
+          >
+            {tabs.map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key)}
+                className={`flex-1 py-2 px-4 rounded-md ${
+                  activeTab === tab.key ? "bg-blue-600" : "bg-transparent"
+                }`}
+              >
+                <Text
+                  className={`text-center text-sm font-medium ${
+                    activeTab === tab.key
+                      ? "text-white"
+                      : isDarkMode
+                      ? "text-gray-400"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Summary Cards */}
+        <View className="px-4 mb-4">
+          <View className="flex-row space-x-3">
+            <View
+              className={`flex-1 p-3 rounded-lg ${
+                isDarkMode ? "bg-gray-800" : "bg-white"
+              } shadow-sm`}
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 rounded-full bg-green-100 items-center justify-center mr-2">
+                  <Icon name="arrow-down" size={14} color="#10b981" />
+                </View>
+                <View>
+                  <Text
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Thu nhập
+                  </Text>
+                  <Text
+                    className={`font-medium ${
+                      isDarkMode ? "text-white" : "text-gray-800"
+                    }`}
+                  >
+                    {formatCurrency(totalIncome)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View
+              className={`flex-1 p-3 rounded-lg ${
+                isDarkMode ? "bg-gray-800" : "bg-white"
+              } shadow-sm`}
+            >
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 rounded-full bg-red-100 items-center justify-center mr-2">
+                  <Icon name="arrow-up" size={14} color="#ef4444" />
+                </View>
+                <View>
+                  <Text
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Chi tiêu
+                  </Text>
+                  <Text
+                    className={`font-medium ${
+                      isDarkMode ? "text-white" : "text-gray-800"
+                    }`}
+                  >
+                    {formatCurrency(totalExpense)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Transactions List */}
+        <ScrollView
+          className="flex-1 px-4"
+          showsVerticalScrollIndicator={false}
+        >
+          {filteredTransactions.length > 0 ? (
+            <View className="space-y-3 pb-20">
+              {filteredTransactions.map((transaction) => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  isDarkMode={isDarkMode}
+                  onPress={() => {
+                    setSelectedTransaction(transaction);
+                    setEditModalVisible(true);
+                  }}
+                />
+              ))}
+            </View>
+          ) : (
+            <View className="flex-1 items-center justify-center py-20">
+              <Icon
+                name="search"
+                size={48}
+                color={isDarkMode ? "#4b5563" : "#d1d5db"}
+              />
+              <Text
+                className={`text-lg font-medium mt-4 ${
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Không tìm thấy giao dịch
+              </Text>
+              <Text
+                className={`text-sm mt-2 ${
+                  isDarkMode ? "text-gray-500" : "text-gray-400"
+                }`}
+              >
+                Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+
+      {/* ➕ Modal sửa / xóa */}
+      <ModalEditTransaction
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        transaction={selectedTransaction}
+        onUpdateTransaction={updateTransaction}
+        onDeleteTransaction={deleteTransaction}
+        isDarkMode={isDarkMode}
+      />
+    </>
+  );
+};
+
+export default TransactionsScreen;
+
+// ===================== MÀN HÌNH THỐNG KÊ =====================
+// Màn hình này hiển thị các thống kê chi tiêu theo tuần, tháng, năm với biểu đồ tròn và biểu đồ cột.
+// Sử dụng context để lấy dữ liệu giao dịch, tính toán lại theo từng tab.
+
+import React, { useState } from 'react'; // Import hook và React
+import { View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native'; // Import các component giao diện
+import { PieChart, BarChart } from 'react-native-chart-kit'; // Import thư viện vẽ biểu đồ
+import Icon from 'react-native-vector-icons/FontAwesome5'; // Import icon
+import { formatCurrency, formatCurrencyShort } from '../utils/format'; // Import hàm format tiền
+import { categories } from '../utils/constants'; // Import danh mục
+import { useTransactionsContext } from '../hooks/useTransactions'; // Import context giao dịch
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, format } from 'date-fns'; // Import các hàm xử lý ngày tháng
+
+const { width } = Dimensions.get('window'); // Lấy chiều rộng màn hình để vẽ biểu đồ
+
+// Component chính của màn hình thống kê
+const StatisticsScreen = ({ isDarkMode = false }) => {
+  // State tab đang chọn: tuần/tháng/năm
+  const [activeStatsTab, setActiveStatsTab] = useState('weekly');
+  // Lấy dữ liệu giao dịch, thống kê, trạng thái loading, lỗi từ context
+  const { transactions, stats, loading, error } = useTransactionsContext();
+
+  // Danh sách các tab thống kê
+  const statsTabs = [
+    { key: 'weekly', label: 'Tuần này' },
+    { key: 'monthly', label: 'Tháng này' },
+    { key: 'yearly', label: 'Năm nay' },
+  ];
+
+  // Hàm lấy tên hiển thị cho tab
+  const getTabDisplayName = (tab) => {
+    switch (tab) {
+      case 'weekly': return 'Tuần này';
+      case 'monthly': return 'Tháng này';
+      case 'yearly': return 'Năm nay';
+      default: return tab;
+    }
+  };
+
+  // Lọc danh sách giao dịch theo tab đang chọn (tuần/tháng/năm)
+  const now = new Date();
+  let filteredTransactions = transactions;
+  if (activeStatsTab === 'weekly') {
+    filteredTransactions = transactions.filter(t => {
+      const date = new Date(t.date);
+      return isWithinInterval(date, { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) });
+    });
+  } else if (activeStatsTab === 'monthly') {
+    filteredTransactions = transactions.filter(t => {
+      const date = new Date(t.date);
+      return isWithinInterval(date, { start: startOfMonth(now), end: endOfMonth(now) });
+    });
+  } else if (activeStatsTab === 'yearly') {
+    filteredTransactions = transactions.filter(t => {
+      const date = new Date(t.date);
+      return isWithinInterval(date, { start: startOfYear(now), end: endOfYear(now) });
+    });
+  }
+
+  // Tính tổng thu nhập và chi tiêu trong khoảng thời gian đã lọc
+  const totalIncome = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+  // Tính tổng chi tiêu theo từng danh mục
+  const expenseTransactions = filteredTransactions.filter(t => t.type === 'expense');
+  const categoryData = {};
+  expenseTransactions.forEach(transaction => {
+    const category = transaction.category;
+    if (!categoryData[category]) {
+      categoryData[category] = 0;
+    }
+    categoryData[category] += Math.abs(transaction.amount);
+  });
+
+  // Chuẩn bị dữ liệu cho biểu đồ tròn (pie chart)
+  const pieChartData = Object.entries(categoryData).map(([category, amount], index) => {
+    const categoryInfo = categories.find(c => c.id === category) || { name: category, icon: 'receipt' };
+    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'];
+    return {
+      name: `${categoryInfo.name}: ${formatCurrency(amount)}`,
+      amount: amount,
+      color: colors[index % colors.length],
+      legendFontColor: isDarkMode ? '#FFFFFF' : '#7F7F7F',
+      legendFontSize: 12,
+    };
+  });
+
+  // Chuẩn bị dữ liệu cho biểu đồ cột (bar chart)
+  let barLabels = [];
+  let barData = [];
+  if (activeStatsTab === 'weekly') {
+    // 7 ngày trong tuần
+    barLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(weekStart);
+      day.setDate(day.getDate() + i);
+      const dayExpense = filteredTransactions.filter(t => t.type === 'expense' && format(new Date(t.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      barData.push(dayExpense);
+    }
+  } else if (activeStatsTab === 'monthly') {
+    // Các ngày trong tháng
+    const daysInMonth = endOfMonth(now).getDate();
+    for (let i = 1; i <= daysInMonth; i++) {
+      barLabels.push(i.toString());
+      const dayExpense = filteredTransactions.filter(t => t.type === 'expense' && new Date(t.date).getDate() === i).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      barData.push(dayExpense);
+    }
+  } else if (activeStatsTab === 'yearly') {
+    // 12 tháng
+    barLabels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+    for (let i = 0; i < 12; i++) {
+      const monthExpense = filteredTransactions.filter(t => t.type === 'expense' && new Date(t.date).getMonth() === i).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      barData.push(monthExpense);
+    }
+  }
+  // Dữ liệu cho BarChart
+  const barChartData = {
+    labels: barLabels,
+    datasets: [
+      {
+        data: barData,
+      },
+    ],
+  };
+
+  // Cấu hình biểu đồ (màu sắc, format số, ...)
+  const chartConfig = {
+    backgroundGradientFrom: isDarkMode ? '#1f2937' : '#ffffff',
+    backgroundGradientTo: isDarkMode ? '#1f2937' : '#ffffff',
+    color: (opacity = 1) => isDarkMode ? `rgba(255, 255, 255, ${opacity})` : `rgba(0, 0, 0, ${opacity})`,
+    strokeWidth: 2,
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false,
+    formatYLabel: (value) => formatCurrencyShort(Number(value)),
+    formatXLabel: (value) => value,
+  };
+
+  // Nếu đang loading dữ liệu
+  if (loading && transactions.length === 0) {
+    return (
+      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Text className={`${isDarkMode ? 'text-white' : 'text-gray-600'}`}>
+          Đang tải dữ liệu...
+        </Text>
+      </View>
+    );
+  }
+
+  // Nếu có lỗi khi lấy dữ liệu
+  if (error) {
+    return (
+      <View className={`flex-1 justify-center items-center p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Icon name="exclamation-triangle" size={48} color="#ef4444" />
+        <Text className={`text-lg font-semibold mt-4 text-center ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+          Lỗi tải dữ liệu
+        </Text>
+        <Text className={`text-sm text-center mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          {error}
+        </Text>
+      </View>
+    );
+  }
+
+  // Giao diện chính của màn hình thống kê
+  return (
+    <ScrollView 
+      className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Tabs chọn tuần/tháng/năm */}
+      <View className="p-4">
+        <View className={`flex-row rounded-lg p-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+          {statsTabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={() => setActiveStatsTab(tab.key)}
+              className={`flex-1 py-2 px-4 rounded-md ${
+                activeStatsTab === tab.key 
+                  ? 'bg-blue-600' 
+                  : 'bg-transparent'
+              }`}
+            >
+              <Text className={`text-center text-sm font-medium ${
+                activeStatsTab === tab.key 
+                  ? 'text-white' 
+                  : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Thẻ tổng quan thu nhập/chi tiêu */}
+      <View className="px-4 mb-6">
+        <Text className={`text-lg font-semibold mb-3 ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`}>
+          Tổng quan {getTabDisplayName(activeStatsTab)}
+        </Text>
+        
+        <View className="flex-row space-x-3">
+          {/* Thẻ thu nhập */}
+          <View className={`flex-1 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Thu nhập</Text>
+              <Icon name="arrow-down" size={16} color="#10b981" />
+            </View>
+            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalIncome)}</Text>
+          </View>
+          {/* Thẻ chi tiêu */}
+          <View className={`flex-1 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Chi tiêu</Text>
+              <Icon name="arrow-up" size={16} color="#ef4444" />
+            </View>
+            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalExpense)}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Biểu đồ tròn: Chi tiêu theo danh mục */}
+      <View className="px-4 mb-6">
+        <Text className={`text-lg font-semibold mb-3 ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`}>
+          Chi tiêu theo danh mục
+        </Text>
+        <View className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+          {pieChartData.length > 0 ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Biểu đồ tròn */}
+              <View style={{ paddingLeft: 40 }}>
+                <PieChart
+                  data={pieChartData}
+                  width={width * 0.6}
+                  height={220}
+                  chartConfig={chartConfig}
+                  accessor="amount"
+                  backgroundColor="transparent"
+                  paddingLeft="0"
+                  absolute
+                  hasLegend={false}
+                />
+              </View>
+              {/* Custom legend bên phải biểu đồ */}
+              <View style={{ marginLeft: 24, justifyContent: 'center', height: 220 }}>
+                {pieChartData.map((item, idx) => (
+                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: item.color, marginRight: 8 }} />
+                    <Text style={{ color: isDarkMode ? '#fff' : '#444', fontSize: 14 }}>{item.name}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : (
+            <View className="items-center justify-center h-44">
+              <Icon name="chart-pie" size={48} color={isDarkMode ? '#4b5563' : '#d1d5db'} />
+              <Text className={`text-lg font-medium mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Không có dữ liệu</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Biểu đồ cột: Chi tiêu theo ngày/tuần/tháng */}
+      <View className="px-4 mb-20">
+        <Text className={`text-lg font-semibold mb-3 ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`}>
+          {activeStatsTab === 'weekly' && 'Chi tiêu theo ngày trong tuần'}
+          {activeStatsTab === 'monthly' && 'Chi tiêu theo ngày'}
+          {activeStatsTab === 'yearly' && 'Chi tiêu theo tháng'}
+        </Text>
+        <View className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+          <BarChart
+            data={barChartData}
+            width={width - 48}
+            height={220}
+            chartConfig={chartConfig}
+            verticalLabelRotation={30}
+            fromZero
+          />
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default StatisticsScreen;
+
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { LinearGradient } from 'expo-linear-gradient';
+import { formatCurrency } from '../utils/format';
+import { categories } from '../utils/constants';
+import CategoryBadge from '../components/CategoryBadge';
+import TransactionCard from '../components/TransactionCard';
+import { useTransactionsContext } from '../hooks/useTransactions';
+import Modal from 'react-native-modal';
+
+const HomeScreen = ({ 
+  isDarkMode = false,
+  onViewAllTransactions,
+  onAddTransaction 
+}) => {
+  const selectedDate = new Date();
+  const { transactions, stats, loading, error } = useTransactionsContext();
+  
+  // Get recent transactions
+  const recentTransactions = transactions.slice(0, 10);
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  // Lọc giao dịch theo danh mục đang chọn
+  const categoryTransactions = selectedCategory
+    ? transactions.filter(t => t.category === selectedCategory.name)
+    : [];
+
+  // Modal hiển thị chi tiết giao dịch
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [transactionModalVisible, setTransactionModalVisible] = useState(false);
+
+  // State để kiểm soát việc ẩn/hiện số dư
+  const [showBalance, setShowBalance] = useState(true);
+
+  if (loading && transactions.length === 0) {
+    return (
+      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <ActivityIndicator size="large" color="#667eea" />
+        <Text className={`mt-4 ${isDarkMode ? 'text-white' : 'text-gray-600'}`}>
+          Đang tải dữ liệu...
+        </Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className={`flex-1 justify-center items-center p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Icon name="exclamation-triangle" size={48} color="#ef4444" />
+        <Text className={`text-lg font-semibold mt-4 text-center ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+          Lỗi tải dữ liệu
+        </Text>
+        <Text className={`text-sm text-center mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          {error}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView 
+      className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* ===================== MÀN HÌNH TRANG CHỦ ===================== */}
+      {/* Đây là màn hình chính hiển thị số dư, thu nhập, chi tiêu, giao dịch gần đây và cho phép xem giao dịch theo danh mục. */}
+      {/* Sử dụng context để lấy dữ liệu giao dịch và thống kê, đồng thời hỗ trợ ẩn/hiện số dư bằng icon con mắt. */}
+      {/* ===================== THẺ SỐ DƯ ===================== */}
+      {/* Hiển thị số dư hiện tại, thu nhập, chi tiêu */}
+      <View className="p-4">
+        <LinearGradient
+          colors={['#667eea', '#764ba2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="rounded-2xl p-6 shadow-lg"
+        >
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-white/80 text-sm">Số dư hiện tại</Text>
+            <TouchableOpacity onPress={() => setShowBalance(v => !v)}>
+              <Icon name={showBalance ? 'eye' : 'eye-slash'} size={16} color="white" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text className="text-3xl font-bold text-white mb-2">
+            {showBalance ? formatCurrency(stats.balance) : '******'}
+          </Text>
+          
+          <View className="flex-row justify-between">
+            <View className="items-center">
+              <Icon name="arrow-down" size={16} color="#10b981" />
+              <Text className="text-white/80 text-xs mt-1">Thu nhập</Text>
+              <Text className="text-white font-medium">{showBalance ? formatCurrency(stats.totalIncome) : '******'}</Text>
+            </View>
+            <View className="items-center">
+              <Icon name="arrow-up" size={16} color="#ef4444" />
+              <Text className="text-white/80 text-xs mt-1">Chi tiêu</Text>
+              <Text className="text-white font-medium">{showBalance ? formatCurrency(stats.totalExpense) : '******'}</Text>
+            </View>
+          </View>
+        </LinearGradient>
+      </View>
+
+      {/* ===================== DANH MỤC CHI TIÊU ===================== */}
+      {/* Hiển thị các danh mục, nhấn vào để xem giao dịch theo danh mục */}
+      <View className="px-4 mb-6">
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className={`text-lg font-semibold ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>
+            Danh mục chi tiêu
+          </Text>
+          <TouchableOpacity>
+            <Text className="text-blue-600 text-sm">Xem tất cả</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View className="flex-row flex-wrap justify-between">
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category.id}
+              className="items-center mb-4"
+              style={{ width: '22%' }}
+              onPress={() => {
+                setSelectedCategory(category);
+                setModalVisible(true);
+              }}
+            >
+              <View className={`w-12 h-12 rounded-full ${category.color} items-center justify-center mb-2`}>
+                <Icon name={category.icon} size={18} className={category.iconColor} />
+              </View>
+              <Text className="text-xs text-center text-gray-600">{category.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* ===================== GIAO DỊCH GẦN ĐÂY ===================== */}
+      {/* Hiển thị danh sách 10 giao dịch gần nhất */}
+      <View className="px-4 mb-20">
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className={`text-lg font-semibold ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>
+            Giao dịch gần đây
+          </Text>
+          <TouchableOpacity onPress={onViewAllTransactions}>
+            <Text className="text-blue-600 text-sm">Xem tất cả</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {recentTransactions.length === 0 ? (
+          <View className="items-center py-8">
+            <Icon name="receipt" size={48} color={isDarkMode ? '#6b7280' : '#d1d5db'} />
+            <Text className={`text-lg font-medium mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              Chưa có giao dịch nào
+            </Text>
+            <Text className={`text-sm text-center mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Thêm giao dịch đầu tiên để bắt đầu theo dõi chi tiêu
+            </Text>
+          </View>
+        ) : (
+          <View className="space-y-3">
+            {recentTransactions.map((transaction) => (
+              <TransactionCard
+                key={transaction.id}
+                transaction={transaction}
+                isDarkMode={isDarkMode}
+                onPress={() => {
+                  setSelectedTransaction(transaction);
+                  setTransactionModalVisible(true);
+                }}
+              />
+            ))}
+          </View>
+        )}
+      </View>
+
+      {/* ===================== MODAL XEM GIAO DỊCH THEO DANH MỤC ===================== */}
+      <Modal isVisible={isModalVisible} onBackdropPress={() => setModalVisible(false)}>
+        <View className={`bg-white rounded-2xl p-4 max-h-[70%] ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+          <Text className={`text-lg font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+            Giao dịch: {selectedCategory ? selectedCategory.name : ''}
+          </Text>
+          {categoryTransactions.length === 0 ? (
+            <Text className="text-center text-gray-500">Chưa có giao dịch nào</Text>
+          ) : (
+            <ScrollView style={{ maxHeight: 300 }}>
+              {categoryTransactions.map((transaction) => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  isDarkMode={isDarkMode}
+                  onPress={() => {
+                    setSelectedTransaction(transaction);
+                    setTransactionModalVisible(true);
+                  }}
+                />
+              ))}
+            </ScrollView>
+          )}
+          <TouchableOpacity
+            className="mt-4 py-2 px-4 bg-blue-600 rounded-lg"
+            onPress={() => setModalVisible(false)}
+          >
+            <Text className="text-white text-center font-semibold">Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* ===================== MODAL CHI TIẾT GIAO DỊCH ===================== */}
+      <Modal isVisible={transactionModalVisible} onBackdropPress={() => setTransactionModalVisible(false)}>
+        <View className={`bg-white rounded-2xl p-4 max-w-[90%] ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+          <Text className={`text-lg font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Chi tiết giao dịch</Text>
+          {selectedTransaction && (
+            <>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Mô tả: {selectedTransaction.description}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Số tiền: {selectedTransaction.type === 'income' ? '+' : '-'}{formatCurrency(selectedTransaction.amount)}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Loại: {selectedTransaction.type === 'income' ? 'Thu nhập' : 'Chi tiêu'}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Danh mục: {selectedTransaction.category}</Text>
+              <Text className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Ngày: {new Date(selectedTransaction.date).toLocaleDateString()}</Text>
+            </>
+          )}
+          <TouchableOpacity
+            className="mt-4 py-2 px-4 bg-blue-600 rounded-lg"
+            onPress={() => setTransactionModalVisible(false)}
+          >
+            <Text className="text-white text-center font-semibold">Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </ScrollView>
+  );
+};
+
+export default HomeScreen;
+
+import React, { useState } from 'react';
+import { View, TouchableOpacity, Text } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { useAuth } from '../hooks/useAuth';
+import Drawer from '../components/Drawer';
+import HomeScreen from '../screens/HomeScreen';
+import TransactionsScreen from '../screens/TransactionsScreen';
+import StatisticsScreen from '../screens/StatisticsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const Tab = createBottomTabNavigator();
+
+// ===================== ĐIỀU HƯỚNG CHÍNH (NAVIGATION) =====================
+// File này định nghĩa cấu trúc điều hướng chính của app, custom tab bar với nút cộng nổi giữa, truyền hàm thêm giao dịch toàn cục.
+
+// Custom Tab Bar với nút + ở giữa
+function CustomTabBar({ state, descriptors, navigation, onAddTransaction }) {
+  return (
+    <View style={{ height: 72, backgroundColor: '#fff', borderTopWidth: 1, borderColor: '#e5e7eb' }}>
+      {/* Nút cộng nổi giữa */}
+      <View style={{ position: 'absolute', alignSelf: 'center', bottom: 16, zIndex: 10 }}>
+        <LinearGradient
+          colors={['#667eea', '#764ba2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, borderWidth: 4, borderColor: '#fff' }}
+        >
+          <TouchableOpacity onPress={onAddTransaction} style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="plus" size={32} color="#fff" />
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+      {/* Các tab chia đều hai bên */}
+      <View style={{ flexDirection: 'row', height: 72, alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 }}>
+        {state.routes.map((route, index) => {
+          // Bỏ tab Add khỏi tab bar (nút cộng đã custom riêng)
+          if (route.name === 'Add') return null;
+          const { options } = descriptors[route.key];
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+              ? options.title
+              : route.name;
+          const isFocused = state.index === index;
+          let iconName = 'home';
+          if (route.name === 'Home') iconName = 'home';
+          if (route.name === 'Transactions') iconName = 'list';
+          if (route.name === 'Statistics') iconName = 'chart-bar';
+          if (route.name === 'Settings') iconName = 'cog';
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+              onPress={() => navigation.navigate(route.name)}
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name={iconName} size={22} color={isFocused ? '#2563eb' : '#6b7280'} />
+              <Text style={{ color: isFocused ? '#2563eb' : '#6b7280', fontSize: 12, marginTop: 2 }}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+// Main App Navigator
+const AppNavigator = ({ onAddTransaction }) => {
+  const { user, logout } = useAuth();
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [activeScreen, setActiveScreen] = useState('Home');
+
+  if (!user) {
+    return null; // This should not happen as we're in the authenticated flow
+  }
+
+  const handleNavigate = (screen) => {
+    setActiveScreen(screen);
+    setIsDrawerVisible(false);
+    // Note: In a real app, you'd use navigation.navigate here
+    console.log('Navigate to:', screen);
+  };
+
+  const handleLogout = () => {
+    setIsDrawerVisible(false);
+    logout();
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      <TabNavigator onAddTransaction={onAddTransaction} />
+      
+      {/* Global Drawer */}
+      <Drawer
+        isVisible={isDrawerVisible}
+        onClose={() => setIsDrawerVisible(false)}
+        activeScreen={activeScreen}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
+        user={user}
+      />
+    </View>
+  );
+};
+
+const TabNavigator = ({ onAddTransaction }) => {
+  return (
+    <Tab.Navigator
+      tabBar={props => <CustomTabBar {...props} onAddTransaction={onAddTransaction} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Trang chủ' }} />
+      <Tab.Screen name="Add" component={() => null} options={{ tabBarLabel: '' }} listeners={{ tabPress: e => e.preventDefault() }} />
+      <Tab.Screen name="Transactions" component={TransactionsScreen} options={{ tabBarLabel: 'Giao dịch' }} />
+      <Tab.Screen name="Statistics" component={StatisticsScreen} options={{ tabBarLabel: 'Thống kê' }} />
+      <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: 'Cài đặt' }} />
+    </Tab.Navigator>
+  );
+};
+
+export default AppNavigator;
+import { useState, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { transactionsAPI, statsAPI } from '../utils/api';
+import { useAuth } from './useAuth';
+import React, { createContext, useContext } from 'react';
+
+// ===================== HOOK QUẢN LÝ GIAO DỊCH =====================
+// File này định nghĩa context, provider và các hàm thao tác với giao dịch, thống kê cho toàn app.
+
+// Tạo context
+const TransactionsContext = createContext();
+
+export function TransactionsProvider({ children }) {
+  const transactionsHook = useTransactions();
+  return (
+    <TransactionsContext.Provider value={transactionsHook}>
+      {children}
+    </TransactionsContext.Provider>
+  );
+}
+
+export function useTransactionsContext() {
+  return useContext(TransactionsContext);
+}
+
+export const useTransactions = () => {
+  const { isAuthenticated } = useAuth();
+  const [transactions, setTransactions] = useState([]);
+  const [stats, setStats] = useState({
+    balance: 0,
+    totalIncome: 0,
+    totalExpense: 0,
+    categoryStats: {}
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const loadTransactions = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const data = await transactionsAPI.getAll();
+      setTransactions(data);
+      
+      // Load stats
+      const statsData = await statsAPI.getStats();
+      setStats(statsData);
+      
+    } catch (err) {
+      console.error('Error loading transactions:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Hàm tính stats từ transactions
+  function calcStats(transactions) {
+    const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const balance = totalIncome + totalExpense;
+    const categoryStats = {};
+    transactions.forEach(t => {
+      if (t.type === 'expense') {
+        const category = t.category;
+        if (!categoryStats[category]) categoryStats[category] = 0;
+        categoryStats[category] += Math.abs(t.amount);
+      }
+    });
+    return { balance, totalIncome, totalExpense, categoryStats };
+  }
+
+  // Add transaction using API
+  const addTransaction = useCallback(async (transactionData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const newTransaction = await transactionsAPI.create(transactionData);
+      
+      // Add to local state
+      setTransactions(prev => {
+        const updated = [newTransaction, ...prev];
+        setStats(calcStats(updated));
+        return updated;
+      });
+      
+      return newTransaction;
+    } catch (err) {
+      console.error('Error adding transaction:', err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Update transaction using API
+  const updateTransaction = useCallback(async (id, transactionData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const updatedTransaction = await transactionsAPI.update(id, transactionData);
+      
+      // Update in local state
+      setTransactions(prev => 
+        prev.map(t => t.id === id ? updatedTransaction : t)
+      );
+      
+      // Reload stats
+      const statsData = await statsAPI.getStats();
+      setStats(statsData);
+      
+      return updatedTransaction;
+    } catch (err) {
+      console.error('Error updating transaction:', err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Delete transaction using API
+  const deleteTransaction = useCallback(async (id) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await transactionsAPI.delete(id);
+      
+      // Remove from local state
+      setTransactions(prev => prev.filter(t => t.id !== id));
+      
+      // Reload stats
+      const statsData = await statsAPI.getStats();
+      setStats(statsData);
+      
+    } catch (err) {
+      console.error('Error deleting transaction:', err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Refresh data
+  const refreshData = useCallback(async () => {
+    if (isAuthenticated) {
+      await loadTransactions();
+    }
+  }, [loadTransactions, isAuthenticated]);
+
+  // Load data on mount or when auth state changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadTransactions();
+    } else {
+      // Clear data on logout
+      setTransactions([]);
+      setStats({
+        balance: 0,
+        totalIncome: 0,
+        totalExpense: 0,
+        categoryStats: {}
+      });
+    }
+  }, [loadTransactions, isAuthenticated]);
+
+  return {
+    transactions,
+    stats,
+    loading,
+    error,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+    refreshData
+  };
+};
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Alert
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { categories } from '../utils/constants';
+
+// ===================== MODAL THÊM GIAO DỊCH =====================
+// Component này hiển thị form để người dùng nhập thông tin giao dịch mới (loại, số tiền, mô tả, danh mục).
+// Nhận các props: visible (hiện/ẩn modal), onClose (đóng modal), onAddTransaction (hàm thêm giao dịch).
+const ModalAddTransaction = ({
+  isDarkMode = false,
+  visible = false,
+  onClose,
+  onAddTransaction
+}) => {
+  const [type, setType] = useState('expense');
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    if (!amount || !description) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+      return;
+    }
+
+    // Nếu là thu nhập và chưa chọn danh mục, tự động set danh mục mặc định
+    let finalCategory = selectedCategory;
+    if (type === 'income' && !selectedCategory) {
+      finalCategory = 'Lương';
+    } else if (type === 'expense' && !selectedCategory) {
+      Alert.alert('Lỗi', 'Vui lòng chọn danh mục');
+      return;
+    }
+
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      Alert.alert('Lỗi', 'Số tiền không hợp lệ');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onAddTransaction({
+        type,
+        category: finalCategory,
+        amount: numAmount,
+        description,
+        date: new Date()
+      });
+      // Reset form
+      setAmount('');
+      setDescription('');
+      setSelectedCategory('');
+      setType('expense');
+      onClose(); // Đóng modal ngay sau khi lưu thành công
+    } catch (error) {
+      console.error('Failed to add transaction:', error);
+      Alert.alert('Lỗi', 'Không thể thêm giao dịch');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!loading) {
+      setAmount('');
+      setDescription('');
+      setSelectedCategory('');
+      setType('expense');
+      onClose();
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={handleClose}
+    >
+      <View className={`flex-1 justify-end ${isDarkMode ? 'bg-black/50' : 'bg-black/30'}`}>
+        <View className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-t-3xl max-h-3/4`}>
+          {/* Header */}
+          <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
+            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+              Thêm giao dịch
+            </Text>
+            <TouchableOpacity onPress={handleClose} disabled={loading}>
+              <Icon 
+                name="times" 
+                size={24} 
+                color={isDarkMode ? '#9ca3af' : '#6b7280'} 
+              />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView className="p-6" showsVerticalScrollIndicator={false}>
+            {/* Transaction Type */}
+            <View className="mb-6">
+              <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                Loại giao dịch
+              </Text>
+              <View className="flex-row space-x-3">
+                <TouchableOpacity
+                  onPress={() => setType('expense')}
+                  className={`flex-1 py-3 rounded-lg border-2 ${
+                    type === 'expense'
+                      ? 'border-red-500 bg-red-50'
+                      : isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'
+                  }`}
+                >
+                  <View className="items-center">
+                    <Icon 
+                      name="arrow-up" 
+                      size={20} 
+                      color={type === 'expense' ? '#ef4444' : (isDarkMode ? '#9ca3af' : '#6b7280')} 
+                    />
+                    <Text className={`mt-1 font-medium ${
+                      type === 'expense' ? 'text-red-600' : (isDarkMode ? 'text-gray-300' : 'text-gray-600')
+                    }`}>
+                      Chi tiêu
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setType('income')}
+                  className={`flex-1 py-3 rounded-lg border-2 ${
+                    type === 'income'
+                      ? 'border-green-500 bg-green-50'
+                      : isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'
+                  }`}
+                >
+                  <View className="items-center">
+                    <Icon 
+                      name="arrow-down" 
+                      size={20} 
+                      color={type === 'income' ? '#10b981' : (isDarkMode ? '#9ca3af' : '#6b7280')} 
+                    />
+                    <Text className={`mt-1 font-medium ${
+                      type === 'income' ? 'text-green-600' : (isDarkMode ? 'text-gray-300' : 'text-gray-600')
+                    }`}>
+                      Thu nhập
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Amount */}
+            <View className="mb-6">
+              <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                Số tiền
+              </Text>
+              <View className={`flex-row items-center border rounded-lg px-3 py-3 ${
+                isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+              }`}>
+                <Icon 
+                  name="money-bill-wave" 
+                  size={20} 
+                  color={isDarkMode ? '#9ca3af' : '#6b7280'} 
+                  className="mr-3"
+                />
+                <TextInput
+                  value={amount}
+                  onChangeText={setAmount}
+                  placeholder="Nhập số tiền"
+                  placeholderTextColor={isDarkMode ? '#9ca3af' : '#9ca3af'}
+                  className={`flex-1 text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+                  keyboardType="numeric"
+                />
+                <Text className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  VNĐ
+                </Text>
+              </View>
+            </View>
+
+            {/* Description */}
+            <View className="mb-6">
+              <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                Mô tả
+              </Text>
+              <View className={`border rounded-lg px-3 py-3 ${
+                isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+              }`}>
+                <TextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Nhập mô tả giao dịch"
+                  placeholderTextColor={isDarkMode ? '#9ca3af' : '#9ca3af'}
+                  className={`text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+            </View>
+
+            {/* Category Selection - Only show for expense */}
+            {type === 'expense' ? (
+              <View className="mb-6">
+                <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                  Danh mục
+                </Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  className="flex-row"
+                >
+                  {categories.map((category) => (
+                    <TouchableOpacity
+                      key={category.id}
+                      onPress={() => setSelectedCategory(category.name)}
+                      className={`mr-3 p-3 rounded-lg border-2 ${
+                        selectedCategory === category.name
+                          ? 'border-blue-500 bg-blue-50'
+                          : isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'
+                      }`}
+                    >
+                      <View className="items-center">
+                        <View className={`w-10 h-10 rounded-full ${category.color} items-center justify-center mb-2`}>
+                          <Icon name={category.icon} size={18} className={category.iconColor} />
+                        </View>
+                        <Text className={`text-xs text-center ${
+                          selectedCategory === category.name
+                            ? 'text-blue-600 font-medium'
+                            : isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {category.name}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : (
+              <View className="mb-6">
+                <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                  Danh mục thu nhập
+                </Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  className="flex-row"
+                >
+                  {['Lương', 'Thưởng', 'Đầu tư', 'Khác'].map((category) => (
+                    <TouchableOpacity
+                      key={category}
+                      onPress={() => setSelectedCategory(category)}
+                      className={`mr-3 p-3 rounded-lg border-2 ${
+                        selectedCategory === category
+                          ? 'border-green-500 bg-green-50'
+                          : isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'
+                      }`}
+                    >
+                      <View className="items-center">
+                        <View className={`w-10 h-10 rounded-full bg-green-100 items-center justify-center mb-2`}>
+                          <Icon name="money-bill-wave" size={18} className="text-green-500" />
+                        </View>
+                        <Text className={`text-xs text-center ${
+                          selectedCategory === category
+                            ? 'text-green-600 font-medium'
+                            : isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {category}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Save Button */}
+            <TouchableOpacity
+              onPress={handleSave}
+              disabled={loading}
+              className="mt-6"
+            >
+              <LinearGradient
+                colors={['#667eea', '#764ba2']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-lg py-4 items-center"
+              >
+                <Text className="text-white text-lg font-semibold">
+                  {loading ? 'Đang lưu...' : 'Lưu giao dịch'}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+export default ModalAddTransaction;

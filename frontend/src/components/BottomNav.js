@@ -25,8 +25,8 @@ const BottomNav = ({
           if (item.key === 'add') {
             return (
               <LinearGradient
-                key={item.key}
-                colors={['#667eea', '#764ba2']}
+                key={item.key}  
+                colors={isDarkMode ? ["#30cfd0", "#330867"] : ["#a8edea", "#fed6e3"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className={`w-16 h-16 rounded-full items-center justify-center -mt-8 border-4 shadow-lg ${

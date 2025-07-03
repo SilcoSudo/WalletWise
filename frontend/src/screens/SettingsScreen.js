@@ -155,7 +155,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
       {/* Profile Section */}
       <View className="p-4">
         <LinearGradient
-          colors={["#a8edea", "#fed6e3"]}
+          colors={isDarkMode ? ["#d7d2cc", "#304352"] : ["#a8edea", "#fed6e3"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="rounded-lg p-4 shadow-sm"
@@ -191,69 +191,6 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
           </TouchableOpacity>
         </LinearGradient>
       </View>
-
-      {/* General Settings
-      <View className="px-4 mb-6">
-        <View className={`rounded-lg p-4 shadow-sm ${
-          isDarkMode ? 'bg-gray-800' : 'bg-white'
-        }`}>
-          <Text className={`text-lg font-semibold mb-4 ${
-            isDarkMode ? 'text-white' : 'text-gray-800'
-          }`}>Cài đặt chung</Text>
-          <View className="space-y-4">
-            {[
-              { label: 'Đơn vị tiền tệ', value: 'Đồng Việt Nam (VND)' },
-              { label: 'Ngôn ngữ', value: 'Tiếng Việt' },
-            ].map((item, index) => (
-              <TouchableOpacity key={index} className="flex-row items-center justify-between py-2">
-                <View>
-                  <Text className={`font-medium ${
-                    isDarkMode ? 'text-white' : 'text-gray-800'
-                  }`}>{item.label}</Text>
-                  <Text className={`text-sm ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>{item.value}</Text>
-                </View>
-                <Icon name="chevron-right" size={16} color={isDarkMode ? '#9ca3af' : '#9ca3af'} />
-              </TouchableOpacity>
-            ))}
-            
-           
-            <View className="flex-row items-center justify-between py-2">
-              <View>
-                <Text className={`font-medium ${
-                  isDarkMode ? 'text-white' : 'text-gray-800'
-                }`}>Chế độ tối</Text>
-                <Text className={`text-sm ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>{isDarkMode ? 'Bật' : 'Tắt'}</Text>
-              </View>
-              <TouchableOpacity 
-                onPress={onToggleDarkMode}
-                className={`w-12 h-6 rounded-full flex-row items-center ${
-                  isDarkMode ? 'bg-purple-600' : 'bg-gray-300'
-                }`}
-              >
-                <View className={`w-5 h-5 rounded-full bg-white shadow-sm ${
-                  isDarkMode ? 'ml-6' : 'ml-1'
-                }`} />
-              </TouchableOpacity>
-            </View>
-            
-            <TouchableOpacity className="flex-row items-center justify-between py-2">
-              <View>
-                <Text className={`font-medium ${
-                  isDarkMode ? 'text-white' : 'text-gray-800'
-                }`}>Thông báo</Text>
-                <Text className={`text-sm ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>Bật</Text>
-              </View>
-              <Icon name="chevron-right" size={16} color={isDarkMode ? '#9ca3af' : '#9ca3af'} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View> */}
 
       {/* Settings Sections */}
       {settingsSections.map((section, sectionIndex) => (

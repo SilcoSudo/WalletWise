@@ -239,7 +239,7 @@ const ModalAddTransaction = ({
               className="mt-6"
             >
               <LinearGradient
-                colors={['#667eea', '#764ba2']}
+                colors={isDarkMode ? ["#d7d2cc", "#304352"] : ["#a8edea", "#fed6e3"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className="rounded-lg py-4 items-center"
