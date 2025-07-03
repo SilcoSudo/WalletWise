@@ -1,12 +1,20 @@
 export const categories = [
-  { id: 'food', name: 'Ăn uống', icon: 'utensils', color: 'bg-red-100', iconColor: 'text-red-500' },
-  { id: 'housing', name: 'Nhà ở', icon: 'home', color: 'bg-purple-100', iconColor: 'text-purple-500' },
-  { id: 'transport', name: 'Di chuyển', icon: 'car', color: 'bg-blue-100', iconColor: 'text-blue-500' },
-  { id: 'entertainment', name: 'Giải trí', icon: 'gamepad', color: 'bg-green-100', iconColor: 'text-green-500' },
-  { id: 'shopping', name: 'Mua sắm', icon: 'shopping-bag', color: 'bg-orange-100', iconColor: 'text-orange-500' },
-  { id: 'health', name: 'Y tế', icon: 'heartbeat', color: 'bg-pink-100', iconColor: 'text-pink-500' },
-  { id: 'education', name: 'Giáo dục', icon: 'graduation-cap', color: 'bg-indigo-100', iconColor: 'text-indigo-500' },
-  { id: 'utilities', name: 'Điện nước', icon: 'bolt', color: 'bg-yellow-100', iconColor: 'text-yellow-500' },
+  // Chi tiêu
+  { id: 'food', name: 'Ăn uống', icon: 'utensils', color: 'bg-red-100', iconColor: 'text-red-500', type: 'expense' },
+  { id: 'housing', name: 'Nhà ở', icon: 'home', color: 'bg-purple-100', iconColor: 'text-purple-500', type: 'expense' },
+  { id: 'transport', name: 'Di chuyển', icon: 'car', color: 'bg-blue-100', iconColor: 'text-blue-500', type: 'expense' },
+  { id: 'entertainment', name: 'Giải trí', icon: 'gamepad', color: 'bg-green-100', iconColor: 'text-green-500', type: 'expense' },
+  { id: 'shopping', name: 'Mua sắm', icon: 'shopping-bag', color: 'bg-orange-100', iconColor: 'text-orange-500', type: 'expense' },
+  { id: 'health', name: 'Y tế', icon: 'heartbeat', color: 'bg-pink-100', iconColor: 'text-pink-500', type: 'expense' },
+  { id: 'education', name: 'Giáo dục', icon: 'graduation-cap', color: 'bg-indigo-100', iconColor: 'text-indigo-500', type: 'expense' },
+  { id: 'utilities', name: 'Điện nước', icon: 'bolt', color: 'bg-yellow-100', iconColor: 'text-yellow-500', type: 'expense' },
+  
+  // Thu nhập
+  { id: 'salary', name: 'Lương', icon: 'money-bill', color: 'bg-green-100', iconColor: 'text-green-500', type: 'income' },
+  { id: 'bonus', name: 'Thưởng', icon: 'gift', color: 'bg-yellow-100', iconColor: 'text-yellow-500', type: 'income' },
+  { id: 'investment', name: 'Đầu tư', icon: 'chart-line', color: 'bg-blue-100', iconColor: 'text-blue-500', type: 'income' },
+  { id: 'gift', name: 'Quà tặng', icon: 'birthday-cake', color: 'bg-pink-100', iconColor: 'text-pink-500', type: 'income' },
+  { id: 'other-income', name: 'Khác (Thu)', icon: 'ellipsis-h', color: 'bg-gray-100', iconColor: 'text-gray-500', type: 'income' },
 ];
 
 export const mockTransactions = [

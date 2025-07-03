@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  StatusBar,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 import { categories } from "../utils/constants";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ModalEditTransaction = ({
   visible,
@@ -23,6 +25,7 @@ const ModalEditTransaction = ({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [type, setType] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -30,6 +33,7 @@ const ModalEditTransaction = ({
       setAmount(transaction.amount.toString());
       setDescription(transaction.description || "");
       setSelectedCategory(transaction.category || "");
+      setType(transaction.type || "expense");
     }
   }, [transaction]);
 
@@ -51,7 +55,7 @@ const ModalEditTransaction = ({
         amount: numAmount,
         description,
         category: selectedCategory,
-        type: transaction.type, // không cho đổi loại
+        type: type,
         date: transaction.date || new Date(),
       });
       onClose();
@@ -88,7 +92,12 @@ const ModalEditTransaction = ({
       transparent
       onRequestClose={onClose}
     >
-      <View
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent={true}
+      />
+      <SafeAreaView
         className={`flex-1 justify-end ${
           isDarkMode ? "bg-black/50" : "bg-black/30"
         }`}
@@ -116,6 +125,90 @@ const ModalEditTransaction = ({
           </View>
 
           <ScrollView className="p-6" showsVerticalScrollIndicator={false}>
+            {/* Loại giao dịch */}
+            <View className="mb-6">
+              <Text
+                className={`text-lg font-semibold mb-3 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Loại giao dịch
+              </Text>
+              <View className="flex-row space-x-3">
+                <TouchableOpacity
+                  onPress={() => setType("expense")}
+                  className={`flex-1 py-3 rounded-lg border-2 ${
+                    type === "expense"
+                      ? "border-red-500 bg-red-50"
+                      : isDarkMode
+                      ? "border-gray-600 bg-gray-700"
+                      : "border-gray-300 bg-gray-50"
+                  }`}
+                >
+                  <View className="items-center">
+                    <Icon
+                      name="arrow-up"
+                      size={20}
+                      color={
+                        type === "expense"
+                          ? "#ef4444"
+                          : isDarkMode
+                          ? "#9ca3af"
+                          : "#6b7280"
+                      }
+                    />
+                    <Text
+                      className={`mt-1 font-medium ${
+                        type === "expense"
+                          ? "text-red-600"
+                          : isDarkMode
+                          ? "text-gray-300"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      Chi tiêu
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setType("income")}
+                  className={`flex-1 py-3 rounded-lg border-2 ${
+                    type === "income"
+                      ? "border-green-500 bg-green-50"
+                      : isDarkMode
+                      ? "border-gray-600 bg-gray-700"
+                      : "border-gray-300 bg-gray-50"
+                  }`}
+                >
+                  <View className="items-center">
+                    <Icon
+                      name="arrow-down"
+                      size={20}
+                      color={
+                        type === "income"
+                          ? "#10b981"
+                          : isDarkMode
+                          ? "#9ca3af"
+                          : "#6b7280"
+                      }
+                    />
+                    <Text
+                      className={`mt-1 font-medium ${
+                        type === "income"
+                          ? "text-green-600"
+                          : isDarkMode
+                          ? "text-gray-300"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      Thu nhập
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* Số tiền */}
             <View className="mb-6">
               <Text
@@ -198,7 +291,9 @@ const ModalEditTransaction = ({
                 Danh mục
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {categories.map((category) => (
+                {categories
+                  .filter(category => category.type === type)
+                  .map((category) => (
                   <TouchableOpacity
                     key={category.id}
                     onPress={() => setSelectedCategory(category.name)}
@@ -244,9 +339,10 @@ const ModalEditTransaction = ({
               className="mt-6"
             >
               <LinearGradient
-                colors={["#667eea", "#764ba2"]}
+                colors={
+                  isDarkMode ? ["#d7d2cc", "#304352"] : ["#667eea", "#764ba2"]
+                }
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
                 className="rounded-lg py-4 items-center"
               >
                 <Text className="text-white text-lg font-semibold">
@@ -264,7 +360,7 @@ const ModalEditTransaction = ({
             </TouchableOpacity>
           </ScrollView>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };

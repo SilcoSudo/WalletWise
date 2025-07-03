@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, StatusBar } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import { useTransactionsContext } from '../hooks/useTransactions';
 import HomeScreen from '../screens/HomeScreen';
@@ -9,6 +9,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import Drawer from '../components/Drawer';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   const [currentScreen, setCurrentScreen] = useState('home');
@@ -104,7 +105,8 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   };
 
   return (
-    <View className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={isDarkMode ? '#000' : '#fff'} />
       {/* Header */}
       <Header
         onMenuPress={() => setShowDrawer(true)}
@@ -135,7 +137,7 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
         user={user}
         isDarkMode={isDarkMode}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

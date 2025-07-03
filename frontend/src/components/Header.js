@@ -24,9 +24,9 @@ const Header = ({ onMenuPress, onNotificationPress, isDarkMode = false }) => {
       end={{ x: 1, y: 1 }}
       className="flex-row items-center justify-between px-4 shadow-md"
       style={{
-        paddingTop: 8,
-        paddingBottom: 8,
-        minHeight: 56,
+        paddingTop: 15,
+        paddingBottom: 15,
+        minHeight: 30,
       }}
     >
       <View className="flex-row items-center">

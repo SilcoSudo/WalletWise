@@ -6,11 +6,15 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  Alert
+  Alert,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { categories } from '../utils/constants';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ModalAddTransaction = ({
   isDarkMode = false,
@@ -23,10 +27,19 @@ const ModalAddTransaction = ({
   const [description, setDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
 
   const handleSave = async () => {
-    if (!amount || !description || !selectedCategory) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+    if (!amount || !description) {
+      Alert.alert('Lỗi', 'Vui lòng nhập số tiền và mô tả');
       return;
     }
 
@@ -43,7 +56,7 @@ const ModalAddTransaction = ({
         category: selectedCategory,
         amount: numAmount,
         description,
-        date: new Date()
+        date
       });
       
       // Reset form
@@ -51,6 +64,7 @@ const ModalAddTransaction = ({
       setDescription('');
       setSelectedCategory('');
       setType('expense');
+      setDate(new Date());
     } catch (error) {
       console.error('Failed to add transaction:', error);
       Alert.alert('Lỗi', 'Không thể thêm giao dịch');
@@ -65,6 +79,7 @@ const ModalAddTransaction = ({
       setDescription('');
       setSelectedCategory('');
       setType('expense');
+      setDate(new Date());
       onClose();
     }
   };
@@ -76,7 +91,12 @@ const ModalAddTransaction = ({
       transparent={true}
       onRequestClose={handleClose}
     >
-      <View className={`flex-1 justify-end ${isDarkMode ? 'bg-black/50' : 'bg-black/30'}`}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent={true}
+      />
+      <SafeAreaView className={`flex-1 justify-end ${isDarkMode ? 'bg-black/50' : 'bg-black/30'}`}>
         <View className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-t-3xl max-h-3/4`}>
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
@@ -145,6 +165,33 @@ const ModalAddTransaction = ({
               </View>
             </View>
 
+            {/* Ngày giao dịch */}
+            <View className="mb-6">
+              <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                Ngày giao dịch
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                className={`border rounded-lg px-3 py-3 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+                }`}
+              >
+                <Text className={`text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {date.toISOString().split("T")[0]}
+                </Text>
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={onChangeDate}
+                  maximumDate={new Date()}
+                />
+              )}
+            </View>
+
             {/* Amount */}
             <View className="mb-6">
               <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
@@ -193,18 +240,19 @@ const ModalAddTransaction = ({
               </View>
             </View>
 
-            {/* Category Selection - Only show for expense */}
-            {type === 'expense' && (
-              <View className="mb-6">
-                <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Danh mục
-                </Text>
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  className="flex-row"
-                >
-                  {categories.map((category) => (
+            {/* Category Selection - Show filtered by transaction type */}
+            <View className="mb-6">
+              <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                Danh mục
+              </Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                className="flex-row"
+              >
+                {categories
+                  .filter(category => category.type === type)
+                  .map((category) => (
                     <TouchableOpacity
                       key={category.id}
                       onPress={() => setSelectedCategory(category.name)}
@@ -230,7 +278,6 @@ const ModalAddTransaction = ({
                   ))}
                 </ScrollView>
               </View>
-            )}
 
             {/* Save Button */}
             <TouchableOpacity
@@ -239,7 +286,7 @@ const ModalAddTransaction = ({
               className="mt-6"
             >
               <LinearGradient
-                colors={isDarkMode ? ["#d7d2cc", "#304352"] : ["#a8edea", "#fed6e3"]}
+                colors={isDarkMode ? ["#d7d2cc", "#304352"] : ["#667eea", "#764ba2"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className="rounded-lg py-4 items-center"
@@ -251,7 +298,7 @@ const ModalAddTransaction = ({
             </TouchableOpacity>
           </ScrollView>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };
