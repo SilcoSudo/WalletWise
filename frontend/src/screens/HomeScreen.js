@@ -212,63 +212,39 @@ const HomeScreen = ({
       >
         {/* Balance Card */}
         <View className="p-4">
-          <LinearGradient 
-            colors={isDarkMode ? ["#5ee7df", "#b490ca"] : ["#a8edea", "#fed6e3"]}
+          <LinearGradient
+            colors={['#667eea', '#764ba2']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="rounded-2xl p-6 shadow-lg"
           >
             <View className="flex-row items-center justify-between mb-4">
-              <Text 
-                className="text-sm"
-                style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
-              >
-                Số dư hiện tại
-              </Text>
+              <Text className="text-white/80 text-sm">Số dư hiện tại</Text>
               <TouchableOpacity onPress={() => setShowBalance((v) => !v)}>
                 <Icon
                   name={showBalance ? "eye" : "eye-slash"}
                   size={16}
-                  color={isDarkMode ? "#ffffff" : "#374151"} 
+                  color="white"
                 />
               </TouchableOpacity>
             </View>
 
-            <Text 
-              className="text-3xl font-bold mb-2"
-              style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
-            >
+            <Text className="text-3xl font-bold text-white mb-2">
               {showBalance ? formatCurrency(balance) : "*****"}
             </Text>
 
             <View className="flex-row justify-between">
               <View className="items-center">
                 <Icon name="arrow-down" size={16} color="#10b981" />
-                <Text 
-                  className="text-xs mt-1"
-                  style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
-                >
-                  Thu nhập
-                </Text>
-                <Text 
-                  className="font-medium"
-                  style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
-                >
+                <Text className="text-white/80 text-xs mt-1">Thu nhập</Text>
+                <Text className="text-white font-medium">
                   {showBalance ? formatCurrency(totalIncome) : "*****"}
                 </Text>
               </View>
               <View className="items-center">
                 <Icon name="arrow-up" size={16} color="#ef4444" />
-                <Text 
-                  className="text-xs mt-1"
-                  style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
-                >
-                  Chi tiêu
-                </Text>
-                <Text 
-                  className="font-medium"
-                  style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
-                >
+                <Text className="text-white/80 text-xs mt-1">Chi tiêu</Text>
+                <Text className="text-white font-medium">
                   {showBalance ? formatCurrency(totalExpense) : "*****"}
                 </Text>
               </View>
