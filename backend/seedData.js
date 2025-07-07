@@ -23,7 +23,10 @@ const categorySchema = new mongoose.Schema({
   name: String,
   type: { type: String, enum: ["expense", "income"] },
   icon: String,
+  color: String,
   bgColor: String,
+  editable: { type: Boolean, default: true },
+  deletable: { type: Boolean, default: true },
 });
 const Category = mongoose.model("Category", categorySchema);
 
@@ -69,63 +72,138 @@ const seedData = async () => {
         name: "Ăn uống",
         type: "expense",
         icon: "utensils",
+        color: "#dc2626",
         bgColor: "#fee2e2",
+        editable: false,
+        deletable: false,
       }, // đỏ nhạt
       {
         name: "Mua sắm",
         type: "expense",
         icon: "shopping-cart",
+        color: "#ca8a04",
         bgColor: "#fef9c3",
+        editable: false,
+        deletable: false,
       }, // vàng nhạt
-      { name: "Di chuyển", type: "expense", icon: "car", bgColor: "#bae6fd" }, // xanh dương nhạt
+      {
+        name: "Di chuyển",
+        type: "expense",
+        icon: "car",
+        color: "#0284c7",
+        bgColor: "#bae6fd",
+        editable: false,
+        deletable: false,
+      }, // xanh dương nhạt
       {
         name: "Hóa đơn",
         type: "expense",
         icon: "file-invoice",
+        color: "#7c3aed",
         bgColor: "#ddd6fe",
+        editable: false,
+        deletable: false,
       }, // tím nhạt
       {
         name: "Giải trí",
         type: "expense",
         icon: "gamepad",
+        color: "#db2777",
         bgColor: "#fce7f3",
+        editable: false,
+        deletable: false,
       }, // hồng nhạt
       {
         name: "Sức khỏe",
         type: "expense",
         icon: "heartbeat",
+        color: "#059669",
         bgColor: "#bbf7d0",
+        editable: false,
+        deletable: false,
       }, // xanh lá nhạt
-      { name: "Giáo dục", type: "expense", icon: "book", bgColor: "#fde68a" }, // vàng cam nhạt
-      { name: "Nhà ở", type: "expense", icon: "home", bgColor: "#f3e8ff" }, // tím pastel
-      { name: "Du lịch", type: "expense", icon: "plane", bgColor: "#bae6fd" }, // xanh dương nhạt
+      {
+        name: "Giáo dục",
+        type: "expense",
+        icon: "book",
+        color: "#d97706",
+        bgColor: "#fde68a",
+        editable: false,
+        deletable: false,
+      }, // vàng cam nhạt
+      {
+        name: "Nhà ở",
+        type: "expense",
+        icon: "home",
+        color: "#9333ea",
+        bgColor: "#f3e8ff",
+        editable: false,
+        deletable: false,
+      }, // tím pastel
+      {
+        name: "Du lịch",
+        type: "expense",
+        icon: "plane",
+        color: "#0284c7",
+        bgColor: "#bae6fd",
+        editable: false,
+        deletable: false,
+      }, // xanh dương nhạt
       {
         name: "Khác (Chi)",
         type: "expense",
         icon: "ellipsis-h",
+        color: "#6b7280",
         bgColor: "#e5e7eb",
+        editable: false,
+        deletable: false,
       }, // xám nhạt
 
       // Income Categories
-      { name: "Lương", type: "income", icon: "money-bill", bgColor: "#d1fae5" }, // xanh lá nhạt
-      { name: "Thưởng", type: "income", icon: "gift", bgColor: "#fef9c3" }, // vàng nhạt
+      {
+        name: "Lương",
+        type: "income",
+        icon: "money-bill",
+        color: "#059669",
+        bgColor: "#d1fae5",
+        editable: false,
+        deletable: false,
+      }, // xanh lá nhạt
+      {
+        name: "Thưởng",
+        type: "income",
+        icon: "gift",
+        color: "#ca8a04",
+        bgColor: "#fef9c3",
+        editable: false,
+        deletable: false,
+      }, // vàng nhạt
       {
         name: "Đầu tư",
         type: "income",
         icon: "chart-line",
+        color: "#0284c7",
         bgColor: "#bae6fd",
+        editable: false,
+        deletable: false,
       }, // xanh dương nhạt
       {
         name: "Quà tặng",
         type: "income",
         icon: "birthday-cake",
+        color: "#db2777",
         bgColor: "#fce7f3",
+        editable: false,
+        deletable: false,
       }, // hồng nhạt
       {
         name: "Khác (Thu)",
         type: "income",
         icon: "ellipsis-h",
+        color: "#6b7280",
         bgColor: "#e5e7eb",
+        editable: false,
+        deletable: false,
       }, // xám nhạt
     ];
     const savedCategories = await Category.insertMany(categories);

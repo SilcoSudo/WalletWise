@@ -22,6 +22,7 @@ const HomeScreen = ({
   isDarkMode = false,
   onViewAllTransactions,
   onAddTransaction,
+  navigation,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -57,7 +58,9 @@ const HomeScreen = ({
   if (!showAllCategories) {
     // Sắp xếp theo số giao dịch giảm dần
     displayedCategories = [...categories]
-      .sort((a, b) => (categoryUsage[b._id] || 0) - (categoryUsage[a._id] || 0))
+      .sort(
+        (a, b) => (categoryUsage[b.name] || 0) - (categoryUsage[a.name] || 0)
+      )
       .slice(0, MAX_CATEGORIES);
   } else {
     displayedCategories = categories;
@@ -212,14 +215,16 @@ const HomeScreen = ({
       >
         {/* Balance Card */}
         <View className="p-4">
-          <LinearGradient 
-            colors={isDarkMode ? ["#5ee7df", "#b490ca"] : ["#a8edea", "#fed6e3"]}
+          <LinearGradient
+            colors={
+              isDarkMode ? ["#5ee7df", "#b490ca"] : ["#a8edea", "#fed6e3"]
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="rounded-2xl p-6 shadow-lg"
           >
             <View className="flex-row items-center justify-between mb-4">
-              <Text 
+              <Text
                 className="text-sm"
                 style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
               >
@@ -229,12 +234,12 @@ const HomeScreen = ({
                 <Icon
                   name={showBalance ? "eye" : "eye-slash"}
                   size={16}
-                  color={isDarkMode ? "#ffffff" : "#374151"} 
+                  color={isDarkMode ? "#ffffff" : "#374151"}
                 />
               </TouchableOpacity>
             </View>
 
-            <Text 
+            <Text
               className="text-3xl font-bold mb-2"
               style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
             >
@@ -244,13 +249,13 @@ const HomeScreen = ({
             <View className="flex-row justify-between">
               <View className="items-center">
                 <Icon name="arrow-down" size={16} color="#10b981" />
-                <Text 
+                <Text
                   className="text-xs mt-1"
                   style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
                 >
                   Thu nhập
                 </Text>
-                <Text 
+                <Text
                   className="font-medium"
                   style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
                 >
@@ -259,13 +264,13 @@ const HomeScreen = ({
               </View>
               <View className="items-center">
                 <Icon name="arrow-up" size={16} color="#ef4444" />
-                <Text 
+                <Text
                   className="text-xs mt-1"
                   style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
                 >
                   Chi tiêu
                 </Text>
-                <Text 
+                <Text
                   className="font-medium"
                   style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
                 >
@@ -280,6 +285,67 @@ const HomeScreen = ({
         <View className="px-4 mb-6">
           {showAllCategories ? (
             <>
+              {/* Header với nút Quản lý khi xem tất cả */}
+              <View className="flex-row items-end justify-between mb-3">
+                <Text
+                  className={`text-lg font-semibold ${
+                    isDarkMode ? "text-indigo-200" : "text-indigo-700"
+                  }`}
+                  style={{
+                    letterSpacing: 0.5,
+                    display: "flex",
+                    alignItems: "center",
+                    borderBottomWidth: 2,
+                    borderBottomColor: isDarkMode ? "#a5b4fc" : "#667eea",
+                    paddingBottom: 4,
+                    paddingTop: 11,
+                  }}
+                >
+                  <Icon
+                    name="list"
+                    size={18}
+                    color="#667eea"
+                    style={{ marginRight: 8, marginBottom: -2 }}
+                  />{" "}
+                  Tất cả danh mục
+                </Text>
+                <TouchableOpacity
+                  onPress={() => navigation?.navigate("categories")}
+                  style={{
+                    paddingHorizontal: 14,
+                    paddingVertical: 6,
+                    marginBottom: 2,
+                    backgroundColor: isDarkMode ? "#374151" : "#f8fafc",
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: isDarkMode ? "#6b7280" : "#e2e8f0",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    elevation: 2,
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Icon
+                    name="cog"
+                    size={13}
+                    color={isDarkMode ? "#9ca3af" : "#667eea"}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      color: isDarkMode ? "#d1d5db" : "#667eea",
+                    }}
+                  >
+                    Quản lý
+                  </Text>
+                </TouchableOpacity>
+              </View>
               {/* Tabs */}
               <View style={{ flexDirection: "row", marginBottom: 12 }}>
                 <TouchableOpacity
@@ -400,28 +466,66 @@ const HomeScreen = ({
             </>
           ) : (
             <>
-              <Text
-                className={`text-lg font-bold mb-3 flex-row items-center ${
-                  isDarkMode ? "text-indigo-200" : "text-indigo-700"
-                }`}
-                style={{
-                  letterSpacing: 0.5,
-                  display: "flex",
-                  alignItems: "center",
-                  borderBottomWidth: 2,
-                  borderBottomColor: isDarkMode ? "#a5b4fc" : "#667eea", // màu chủ đạo
-                  paddingBottom: 4,
-                  paddingTop: 11,
-                }}
-              >
-                <Icon
-                  name="star"
-                  size={18}
-                  color="#667eea" // màu chủ đạo
-                  style={{ marginRight: 8, marginBottom: -2 }}
-                />{" "}
-                Danh mục thường dùng
-              </Text>
+              <View className="flex-row items-end justify-between mb-2">
+                <Text
+                  className={`text-lg font-semibold ${
+                    isDarkMode ? "text-indigo-200" : "text-indigo-700"
+                  }`}
+                  style={{
+                    letterSpacing: 0.5,
+                    display: "flex",
+                    alignItems: "center",
+                    borderBottomWidth: 2,
+                    borderBottomColor: isDarkMode ? "#a5b4fc" : "#667eea", // màu chủ đạo
+                    paddingBottom: 4,
+                    paddingTop: 11,
+                  }}
+                >
+                  <Icon
+                    name="star"
+                    size={18}
+                    color="#667eea" // màu chủ đạo
+                    style={{ marginRight: 8, marginBottom: -2 }}
+                  />{" "}
+                  Danh mục thường dùng
+                </Text>
+                <TouchableOpacity
+                  onPress={() => navigation?.navigate("categories")}
+                  style={{
+                    paddingHorizontal: 14,
+                    paddingVertical: 6,
+                    marginBottom: 2,
+                    backgroundColor: isDarkMode ? "#374151" : "#f8fafc",
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: isDarkMode ? "#6b7280" : "#e2e8f0",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    elevation: 2,
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Icon
+                    name="cog"
+                    size={13}
+                    color={isDarkMode ? "#9ca3af" : "#667eea"}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      color: isDarkMode ? "#d1d5db" : "#667eea",
+                    }}
+                  >
+                    Quản lý
+                  </Text>
+                </TouchableOpacity>
+              </View>
               {renderCategoryRows(displayedCategories)}
               {categories.length > MAX_CATEGORIES && (
                 <View style={{ alignItems: "center", marginTop: 8 }}>
@@ -454,10 +558,7 @@ const HomeScreen = ({
               }`}
             >
               {selectedCategory
-                ? `Giao dịch - ${
-                    categories.find((c) => c._id === selectedCategory)?.name ||
-                    ""
-                  }`
+                ? `Giao dịch - ${selectedCategory}`
                 : "Giao dịch gần đây"}
             </Text>
             <TouchableOpacity onPress={onViewAllTransactions}>
@@ -507,13 +608,21 @@ const HomeScreen = ({
         animationType="none"
         transparent={true}
         onRequestClose={closeModal}
+        statusBarTranslucent={true}
       >
         <TouchableWithoutFeedback onPress={closeModal}>
           <View
             style={{
               flex: 1,
-              backgroundColor: "rgba(0,0,0,0.3)",
+              backgroundColor: "rgba(0,0,0,0.5)",
               justifyContent: "flex-end",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: "100%",
+              height: "100%",
             }}
           >
             <Animated.View
@@ -545,8 +654,9 @@ const HomeScreen = ({
               <ScrollView style={{ marginTop: 24 }}>
                 {(() => {
                   const modalTransactions = transactions
-                    .filter((t) => t.category === modalCategory?._id)
+                    .filter((t) => t.category === modalCategory?.name)
                     .sort((a, b) => new Date(b.date) - new Date(a.date));
+
                   if (modalTransactions.length === 0) {
                     return (
                       <View className="items-center py-8">

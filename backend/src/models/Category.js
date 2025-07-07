@@ -1,9 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const categorySchema = new mongoose.Schema({
   name: String,
-  type: { type: String, enum: ['expense', 'income'] },
-  icon: String
+  type: { type: String, enum: ["expense", "income"] },
+  icon: String,
+  color: String,
+  bgColor: String,
+  editable: { type: Boolean, default: true },
+  deletable: { type: Boolean, default: true },
 });
 
-module.exports = mongoose.model('Category', categorySchema);
+module.exports = mongoose.model("Category", categorySchema);

@@ -6,13 +6,26 @@ export const useCategories = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const data = await categoriesAPI.getAll();
+      setCategories(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    categoriesAPI
-      .getAll()
-      .then(setCategories)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+    loadCategories();
   }, []);
 
-  return { categories, loading, error };
+  const refreshCategories = () => {
+    loadCategories();
+  };
+
+  return { categories, loading, error, refreshCategories };
 };

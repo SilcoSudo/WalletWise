@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://192.168.1.19:5000/api";
+const API_BASE_URL = "http://192.168.1.16:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -108,18 +108,35 @@ export const statsAPI = {
 // Categories API
 export const categoriesAPI = {
   getAll: () => apiRequest("/categories"),
+
+  create: (categoryData) =>
+    apiRequest("/categories", {
+      method: "POST",
+      body: JSON.stringify(categoryData),
+    }),
+
+  update: (id, categoryData) =>
+    apiRequest(`/categories/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(categoryData),
+    }),
+
+  delete: (id) =>
+    apiRequest(`/categories/${id}`, {
+      method: "DELETE",
+    }),
 };
 
 // Settings API
 export const settingsAPI = {
   getSettings: () => apiRequest("/settings"),
-  
+
   updateLanguage: (language) =>
     apiRequest("/settings/language", {
       method: "PUT",
       body: JSON.stringify({ language }),
     }),
-  
+
   updateNotifications: (enabled) =>
     apiRequest("/settings/notifications", {
       method: "PUT",
@@ -130,19 +147,19 @@ export const settingsAPI = {
 // Profile API
 export const profileAPI = {
   getProfile: () => apiRequest("/profile"),
-  
+
   updateProfile: (profileData) =>
     apiRequest("/profile", {
       method: "PUT",
       body: JSON.stringify(profileData),
     }),
-  
+
   changePassword: (passwordData) =>
     apiRequest("/profile/change-password", {
       method: "PUT",
       body: JSON.stringify(passwordData),
     }),
-  
+
   deleteAccount: () =>
     apiRequest("/profile", {
       method: "DELETE",
