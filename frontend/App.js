@@ -8,6 +8,7 @@ import { useTheme } from './src/hooks/useTheme';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
 import ModalAddTransaction from './src/components/ModalAddTransaction';
+import './src/utils/i18n'; // Import the i18n configuration
 
 // ===================== REFACTORED APP =====================
 // Entry point với AuthNavigator và AppNavigator tách biệt, global modal

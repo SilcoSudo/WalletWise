@@ -9,12 +9,13 @@ import SettingsScreen from '../screens/SettingsScreen';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import Drawer from '../components/Drawer';
+import BudgetsScreen from '../screens/BudgetScreen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   const [currentScreen, setCurrentScreen] = useState('home');
   const [showDrawer, setShowDrawer] = useState(false);
-  
+
   const { user, isAuthenticated, logout } = useAuth();
   const { refreshData } = useTransactionsContext();
 
@@ -84,6 +85,13 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
             isDarkMode={isDarkMode}
           />
         );
+      case 'budgets':
+        return (
+          <BudgetsScreen
+            isDarkMode={isDarkMode}
+          // nếu BudgetsScreen cần props khác thì truyền thêm ở đây
+          />
+        );
       case 'settings':
         return (
           <SettingsScreen
@@ -118,7 +126,7 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
       <View className="flex-1">
         {renderScreen()}
       </View>
-      
+
       {/* Bottom Navigation */}
       <BottomNav
         activeScreen={currentScreen}

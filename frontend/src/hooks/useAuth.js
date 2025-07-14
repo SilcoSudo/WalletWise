@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI, settingsAPI, profileAPI } from '../utils/api';
+import i18n from '../utils/i18n';
 
 // Create a context for the auth state
 const AuthContext = createContext();
@@ -209,6 +210,7 @@ export const AuthProvider = ({ children }) => {
       const updatedUser = { ...user, language: response.language };
       setUser(updatedUser);
       await saveAuthData(global.authToken, updatedUser);
+      i18n.changeLanguage(response.language);
       
       return response;
     } catch (err) {

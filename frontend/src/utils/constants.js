@@ -53,16 +53,17 @@ export const mockTransactions = [
 ];
 
 export const navigationItems = [
-  { key: 'home', label: 'Trang chủ', icon: 'home' },
-  { key: 'transactions', label: 'Giao dịch', icon: 'exchange-alt' },
-  { key: 'statistics', label: 'Thống kê', icon: 'chart-pie' },
-  { key: 'settings', label: 'Cài đặt', icon: 'cog' },
+  { key: 'home', label: 'navigation.home', icon: 'home' },
+  { key: 'transactions', label: 'navigation.transactions', icon: 'exchange-alt' },
+  { key: 'statistics', label: 'navigation.statistics', icon: 'chart-pie' },
+  { key: 'budgets', label: 'navigation.budgets',   icon: 'piggy-bank' },
+  { key: 'settings', label: 'navigation.settings', icon: 'cog' },
 ];
 
 export const bottomNavItems = [
-  { key: 'home', label: 'Trang chủ', icon: 'home' },
-  { key: 'transactions', label: 'Giao dịch', icon: 'exchange-alt' },
-  { key: 'add', label: 'Thêm', icon: 'plus' },
-  { key: 'statistics', label: 'Thống kê', icon: 'chart-pie' },
-  { key: 'settings', label: 'Cài đặt', icon: 'cog' },
+  { key: 'home', label: 'navigation.home', icon: 'home' },
+  { key: 'transactions', label: 'navigation.transactions', icon: 'exchange-alt' },
+  { key: 'add', label: 'navigation.add', icon: 'plus' },
+  { key: 'statistics', label: 'navigation.statistics', icon: 'chart-pie' },
+  { key: 'settings', label: 'navigation.settings', icon: 'cog' },
 ]; 

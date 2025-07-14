@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://192.168.1.19:5000/api";
+const API_BASE_URL = "http://10.32.93.129:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -148,6 +148,32 @@ export const profileAPI = {
       method: "DELETE",
     }),
 };
+//Bugets API
+export const budgetAPI = {
+  // Lấy toàn bộ ngân sách, có thể truyền status = All | Active | Expired
+  getAll: (status = "Active") =>
+    apiRequest(`/budgets?status=${encodeURIComponent(status)}`),
+
+  // Tạo mới ngân sách
+  create: ({ category, limit, period, alert }) =>
+    apiRequest("/budgets", {
+      method: "POST",
+      body: JSON.stringify({ category, limit, period, alert }),
+    }),
+
+  // Cập nhật ngân sách theo id
+  update: (id, { category, limit, period, alert }) =>
+    apiRequest(`/budgets/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ category, limit, period, alert }),
+    }),
+
+  // Xóa ngân sách
+  delete: (id) =>
+    apiRequest(`/budgets/${id}`, {
+      method: "DELETE",
+    }),
+};
 
 export default {
   auth: authAPI,
@@ -156,4 +182,5 @@ export default {
   categories: categoriesAPI,
   settings: settingsAPI,
   profile: profileAPI,
+  budgets: budgetAPI,
 };
