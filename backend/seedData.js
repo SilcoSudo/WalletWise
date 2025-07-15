@@ -40,6 +40,35 @@ const transactionSchema = new mongoose.Schema({
 });
 const Transaction = mongoose.model("Transaction", transactionSchema);
 
+// =====================
+// TẠO DỮ LIỆU MẪU CHO BÁO CÁO (REPORT)
+// =====================
+const Report = require('./src/models/Report');
+
+const reports = [
+  {
+    title: 'Báo cáo chi tiêu tháng 5/2025',
+    startDate: new Date('2025-05-01'),
+    endDate: new Date('2025-05-31'),
+    details: [
+      { category: 'Ăn uống', amount: 120000, type: 'expense', note: 'Ăn trưa cơm VP' },
+      { category: 'Đi lại', amount: 80000, type: 'expense', note: 'Grab đi làm' },
+      { category: 'Lương', amount: 10000000, type: 'income', note: 'Lương tháng 5' },
+      { category: 'Mua sắm', amount: 300000, type: 'expense', note: 'Mua giày thể thao' },
+    ]
+  },
+  {
+    title: 'Báo cáo thu nhập tháng 6/2025',
+    startDate: new Date('2025-06-01'),
+    endDate: new Date('2025-06-30'),
+    details: [
+      { category: 'Lương', amount: 10000000, type: 'income', note: 'Lương tháng 6' },
+      { category: 'Quà tặng', amount: 200000, type: 'income', note: 'Tiền sinh nhật' },
+      { category: 'Vé máy bay', amount: 700000, type: 'expense', note: 'Vé máy bay Đà Nẵng' },
+    ]
+  }
+];
+
 // Dữ liệu mẫu
 const seedData = async () => {
   try {
@@ -47,6 +76,7 @@ const seedData = async () => {
     await User.deleteMany({});
     await Category.deleteMany({});
     await Transaction.deleteMany({});
+    await Report.deleteMany({});
 
     // Tạo Users
     const users = [
@@ -556,7 +586,10 @@ const seedData = async () => {
     ];
     await Transaction.insertMany(transactions);
 
-    console.log("Dữ liệu mẫu đã được insert thành công!");
+    // Tạo Reports
+    await Report.insertMany(reports);
+    console.log('Dữ liệu mẫu báo cáo đã được insert thành công!');
+
     mongoose.connection.close();
   } catch (err) {
     console.error("Lỗi khi insert dữ liệu:", err);

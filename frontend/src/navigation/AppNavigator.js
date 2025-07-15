@@ -7,6 +7,7 @@ import TransactionsScreen from "../screens/TransactionsScreen";
 import StatisticsScreen from "../screens/StatisticsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import CategoriesScreen from "../screens/CategoriesScreen";
+import ReportsScreen from '../screens/ReportsScreen';
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import Drawer from "../components/Drawer";
@@ -104,6 +105,16 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
       case "categories":
         return (
           <CategoriesScreen
+            isDarkMode={isDarkMode}
+            navigation={{
+              navigate: handleScreenChange,
+              goBack: () => setCurrentScreen("home"),
+            }}
+          />
+        );
+      case "reports":
+        return (
+          <ReportsScreen
             isDarkMode={isDarkMode}
             navigation={{
               navigate: handleScreenChange,

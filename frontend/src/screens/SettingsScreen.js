@@ -52,6 +52,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
       items: [
         { icon: "download", label: "Xuất dữ liệu", action: "export", iconColor: "#10b981", bgColor: "bg-green-100" },
         { icon: "upload", label: "Nhập dữ liệu", action: "import", iconColor: "#3b82f6", bgColor: "bg-blue-100" },
+        { icon: "file-alt", label: "Báo cáo", action: "reports", iconColor: "#2563eb", bgColor: "bg-blue-100" },
         { icon: "trash-alt", label: "Xóa tất cả dữ liệu", action: "delete", iconColor: "#ef4444", bgColor: "bg-red-100" },
       ],
     },
@@ -79,6 +80,9 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
        case "language": // Khi người dùng chọn "Ngôn ngữ"
       setIsLanguageModalVisible(true);  // Mở modal ngôn ngữ
       break;
+      case "reports":
+        navigation.navigate && navigation.navigate("reports");
+        break;
       default:
         break;
     }

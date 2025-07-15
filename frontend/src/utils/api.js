@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://192.168.1.16:5000/api";
+const API_BASE_URL = "http://192.168.88.144:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -165,6 +165,37 @@ export const profileAPI = {
       method: "DELETE",
     }),
 };
+
+// ==== API Báo cáo (Report) ====
+// Lấy danh sách báo cáo
+export const getReports = () => apiRequest("/reports");
+// Tạo báo cáo mới
+export const createReport = (data) => apiRequest("/reports", {
+  method: "POST",
+  body: JSON.stringify(data),
+});
+// Sửa báo cáo
+export const updateReport = (id, data) => apiRequest(`/reports/${id}`, {
+  method: "PUT",
+  body: JSON.stringify(data),
+});
+// Xóa báo cáo
+export const deleteReport = (id) => apiRequest(`/reports/${id}`, {
+  method: "DELETE",
+});
+// Export báo cáo ra CSV
+export const exportReport = (id) => apiRequest(`/reports/export/${id}`, {
+  responseType: "blob",
+});
+// Import báo cáo từ CSV (dữ liệu đã parse thành object)
+export const importReport = (data) => apiRequest("/reports/import", {
+  method: "POST",
+  body: JSON.stringify(data),
+});
+// Tải dữ liệu mẫu (chạy lại seedData.js)
+export const seedDataReport = () => apiRequest("/reports/seed", {
+  method: "POST",
+});
 
 export default {
   auth: authAPI,
