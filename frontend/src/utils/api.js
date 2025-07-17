@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://10.32.93.129:5000/api";
+const API_BASE_URL = "http://10.66.205.74:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {

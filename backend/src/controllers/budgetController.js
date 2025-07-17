@@ -1,54 +1,70 @@
+// backend/src/controllers/budgetController.js
+const mongoose    = require('mongoose');
 const Budget      = require('../models/Budget');
 const Transaction = require('../models/Transaction');
+const Category    = require('../models/Category');
 
 /**
- * Tính tổng tiền đã chi cho 1 danh mục trong khoảng từ createdAt -> expiryDate
+ * Enrich một budget với spent, percent, overLimit, expired
  */
-async function calcSpent(budget) {
-  const { category, createdAt, period } = budget;
-  // xác định hạn: createdAt + period
-  let expiry = new Date(createdAt);
-  switch (period) {
+async function enrichBudget(b) {
+  // 1. Tính ngày hết hạn
+  let expiry = new Date(b.createdAt);
+  switch (b.period) {
     case 'Tuần':  expiry.setDate(expiry.getDate() + 7);  break;
     case 'Tháng': expiry.setMonth(expiry.getMonth() + 1);break;
     case 'Quý':   expiry.setMonth(expiry.getMonth() + 3);break;
     case 'Năm':   expiry.setFullYear(expiry.getFullYear() + 1);break;
   }
-  // aggregate transactions
+  const expired = Date.now() > expiry;
+
+  // 2. Lookup transactions → categories → match theo tên category
   const agg = await Transaction.aggregate([
-    { $match: { category } },
+    {
+      $lookup: {
+        from: 'categories',        // tên collection Category trong Mongo
+        localField: 'categoryId',
+        foreignField: '_id',
+        as: 'cat'
+      }
+    },
+    { $unwind: '$cat' },
+    { $match: { 'cat.name': b.category } },  // khớp tên danh mục
     { $group: { _id: null, total: { $sum: '$amount' } } }
   ]);
   const spent = agg[0]?.total || 0;
-  return { spent, expired: new Date() > expiry };
+
+  // 3. Tính %
+  const percent   = b.limit > 0 ? Math.round(spent / b.limit * 100) : 0;
+  const overLimit = spent > b.limit;
+
+  return {
+    id:        b._id,
+    category:  b.category,
+    limit:     b.limit,
+    period:    b.period,
+    alert:     b.alert,
+    createdAt: b.createdAt,
+    spent,
+    percent,
+    expired,
+    overLimit
+  };
 }
 
 exports.getBudgets = async (req, res) => {
   try {
-    const status = req.query.status || 'Active';
+    const status  = req.query.status || 'Active';
     const budgets = await Budget.find().sort('-createdAt');
-    // Đưa vào spent + expired
-    const withSpent = await Promise.all(
-      budgets.map(async b => {
-        const { spent, expired } = await calcSpent(b);
-        return {
-          id: b._id,
-          category: b.category,
-          limit: b.limit,
-          period: b.period,
-          alert: b.alert,
-          spent,
-          expired,
-          createdAt: b.createdAt
-        };
-      })
-    );
-    // Lọc theo trạng thái
-    const filtered = withSpent.filter(b => 
-      status==='All'     ? true 
-    : status==='Active'  ? !b.expired 
-                        :  b.expired
-    );
+    const detailed = await Promise.all(budgets.map(enrichBudget));
+
+    // Lọc theo status
+    const filtered = detailed.filter(b => {
+      if (status === 'All')     return true;
+      if (status === 'Active')  return !b.expired;
+      return b.expired;
+    });
+
     res.json(filtered);
   } catch (err) {
     console.error(err);
@@ -60,7 +76,17 @@ exports.createBudget = async (req, res) => {
   try {
     const { category, limit, period, alert } = req.body;
     const b = await Budget.create({ category, limit, period, alert });
-    res.status(201).json({ id: b._id, category, limit, period, alert, spent: 0, expired: false });
+    res.status(201).json({
+      id:        b._id,
+      category:  b.category,
+      limit:     b.limit,
+      period:    b.period,
+      alert:     b.alert,
+      spent:     0,
+      percent:   0,
+      expired:   false,
+      overLimit: false
+    });
   } catch (err) {
     console.error(err);
     res.status(400).json({ message: 'Tạo ngân sách thất bại' });
