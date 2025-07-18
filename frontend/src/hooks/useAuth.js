@@ -62,9 +62,13 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await authAPI.login(credentials);
       global.authToken = response.token;
-      setUser(response.user);
-      await saveAuthData(response.token, response.user);
-      return response;
+      
+      // Get fresh user data including avatar
+      const freshUserData = await profileAPI.getProfile();
+      setUser(freshUserData);
+      await saveAuthData(response.token, freshUserData);
+      
+      return { ...response, user: freshUserData };
     } catch (err) {
       setError(err.message);
       throw err;
@@ -80,9 +84,13 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await authAPI.register(userData);
       global.authToken = response.token;
-      setUser(response.user);
-      await saveAuthData(response.token, response.user);
-      return response;
+      
+      // Get fresh user data including avatar
+      const freshUserData = await profileAPI.getProfile();
+      setUser(freshUserData);
+      await saveAuthData(response.token, freshUserData);
+      
+      return { ...response, user: freshUserData };
     } catch (err) {
       setError(err.message);
       throw err;
@@ -98,9 +106,13 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await authAPI.guestLogin();
       global.authToken = response.token;
-      setUser(response.user);
-      await saveAuthData(response.token, response.user);
-      return response;
+      
+      // Get fresh user data including avatar
+      const freshUserData = await profileAPI.getProfile();
+      setUser(freshUserData);
+      await saveAuthData(response.token, freshUserData);
+      
+      return { ...response, user: freshUserData };
     } catch (err) {
       setError(err.message);
       throw err;
@@ -241,6 +253,22 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
+  // Refresh user data from server
+  const refreshUserData = useCallback(async () => {
+    try {
+      if (!global.authToken) return;
+      
+      const freshUserData = await profileAPI.getProfile();
+      setUser(freshUserData);
+      await saveAuthData(global.authToken, freshUserData);
+      
+      return freshUserData;
+    } catch (err) {
+      console.error('Error refreshing user data:', err);
+      // Don't throw error for refresh, just log it
+    }
+  }, []);
+
   const value = {
     user,
     loading,
@@ -257,6 +285,7 @@ export const AuthProvider = ({ children }) => {
     getSettings,
     updateLanguage,
     updateNotificationSettings,
+    refreshUserData,
   };
 
   return (

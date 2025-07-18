@@ -83,14 +83,14 @@ function MainApp() {
           onAddTransaction={handleOpenAddTransaction}
         />
       </NavigationContainer>
-      
-      {/* Global Add Transaction Modal */}
       <ModalAddTransaction
         visible={showAddModal}
         onClose={handleCloseAddTransaction}
         onAddTransaction={handleAddTransaction}
         isDarkMode={isDarkMode}
       />
+      {/* Global Add Transaction Modal */}
+      
     </>
   );
 }

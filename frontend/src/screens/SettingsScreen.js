@@ -4,8 +4,11 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../hooks/useAuth";
 
+// Import AvatarPicker
+import AvatarPicker from "../components/AvatarPicker";
+
 const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, navigation }) => {
-  const { user, updateUser, deleteUser, updatePassword, updateLanguage, updateNotificationSettings } = useAuth();
+  const { user, updateUser, deleteUser, updatePassword, updateLanguage, updateNotificationSettings, refreshUserData } = useAuth();
 
   // States for modals
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
@@ -14,8 +17,9 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
 
   // States for user input
-  const [newUsername, setNewUsername] = useState(user?.username);
+  const [name, setName] = useState(user?.name || user?.username || "");
   const [newEmail, setNewEmail] = useState(user?.email);
+  const [avatar, setAvatar] = useState(user?.avatar || null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);  // State for notifications
@@ -30,7 +34,14 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
     if (user?.notifications?.enabled !== undefined) {
       setIsNotificationsEnabled(user.notifications.enabled);
     }
+    setName(user?.name || user?.username || "");
+    setAvatar(user?.avatar || null);
   }, [user]);
+
+  // Refresh user data when component mounts
+  useEffect(() => {
+    refreshUserData();
+  }, [refreshUserData]);
   const settingsSections = [
     {
       title: "Tài khoản",
@@ -85,13 +96,27 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
   };
 
   const handleSaveProfile = () => {
-    if (newUsername === "" || newEmail === "") {
+    if (name === "" || newEmail === "") {
       Alert.alert("Thông báo", "Vui lòng điền đầy đủ thông tin.");
       return;
     }
-
-    updateUser({ username: newUsername, email: newEmail });
+    // Gửi avatar nếu có
+    updateUser({ name, email: newEmail, avatar });
     setIsProfileModalVisible(false);  // Close Profile modal
+  };
+
+  // Callback khi chọn avatar mới
+  const handleAvatarChange = async (newAvatarUrl) => {
+    setAvatar(newAvatarUrl);
+    try {
+      // Tự động lưu avatar mới lên backend
+      await updateUser({ avatar: newAvatarUrl });
+    } catch (error) {
+      console.error('Error saving avatar:', error);
+      // Revert avatar if save fails
+      setAvatar(user?.avatar || null);
+      Alert.alert("Lỗi", "Không thể lưu ảnh đại diện. Vui lòng thử lại.");
+    }
   };
 
   const handleSavePassword = async () => {
@@ -164,17 +189,17 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
             Tài khoản
           </Text>
           <View className="flex-row items-center mb-4">
-            <View className="h-16 w-16 rounded-full bg-white/30 mr-4 border-2 border-white/50">
-              <Icon
-                name="user"
-                size={24}
-                color="#6b7280"
-                style={{ textAlign: "center", lineHeight: 64 }}
+            {/* Avatar Picker */}
+            <View className="mr-4">
+              <AvatarPicker
+                currentAvatar={avatar}
+                onAvatarChange={handleAvatarChange}
+                isDarkMode={isDarkMode}
               />
             </View>
             <View>
               <Text className="font-medium text-gray-800">
-                {user?.username || 'Người dùng'}
+                {name || 'Người dùng'}
               </Text>
               <Text className="text-sm text-gray-600">
                 {user?.email || 'email@example.com'}
@@ -288,13 +313,21 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
               Chỉnh sửa hồ sơ
             </Text>
             
+            {/* Avatar Picker trong modal chỉnh sửa hồ sơ */}
+            <View className="items-center mb-4">
+              <AvatarPicker
+                currentAvatar={avatar}
+                onAvatarChange={handleAvatarChange}
+                isDarkMode={isDarkMode}
+              />
+            </View>
             <View className="mb-4">
               <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Tên người dùng
               </Text>
               <TextInput
-                value={newUsername}
-                onChangeText={setNewUsername}
+                value={name}
+                onChangeText={setName}
                 className={`border rounded-lg p-3 ${
                   isDarkMode 
                     ? 'border-gray-600 bg-gray-700 text-white' 
@@ -334,7 +367,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
                 onPress={handleSaveProfile}
                 className="px-4 py-2 bg-blue-600 rounded-lg"
               >
-                <Text className="text-white">Lưu</Text>
+                <Text className="text-white">Ok</Text>
               </TouchableOpacity>
             </View>
           </View>

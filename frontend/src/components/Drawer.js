@@ -46,7 +46,7 @@ const Drawer = ({
       animationIn="slideInLeft"
       animationOut="slideOutLeft"
       backdropOpacity={0.3}
-      style={{ margin: 0 }}
+      style={{ margin: 0, justifyContent: "flex-start" }}
       useNativeDriverForBackdrop
     >
       <View
@@ -63,19 +63,21 @@ const Drawer = ({
           <View className="flex-row items-center space-x-3">
             <View className="h-12 w-12 rounded-full bg-gray-400 border-2 border-gray-600 overflow-hidden">
               <Image
-                source={{ uri: "https://via.placeholder.com/100" }}
+                source={{
+                  uri:
+                    user && user.avatar
+                      ? user.avatar
+                      : "https://via.placeholder.com/100",
+                }}
                 className="w-full h-full rounded-full"
               />
             </View>
             <View>
-              <Text
-                className={`text-sm font-medium text-gray-700 px-4 mb-2 `}
-              >
-                {user ? user.username : "Người dùng"}
+              {/* Hiển thị tên người dùng */}
+              <Text className={`text-sm font-medium text-gray-700 px-4 mb-2`}>
+                {user ? user.username || user.name : "Người dùng"}
               </Text>
-              <Text
-                className={`text-xs font-medium text-gray-700 px-4 mb-2 `}
-              >
+              <Text className={`text-xs font-medium text-gray-700 px-4 mb-2 `}>
                 {user ? user.email : "user@example.com"}
               </Text>
             </View>
@@ -89,7 +91,10 @@ const Drawer = ({
               onPress={() => handleNavigate(item.key)}
               className={`flex-row items-center w-full px-4 py-3 ${
                 activeScreen === item.key
-                  ? isDarkMode ? "bg-gray-700" : "bg-blue-50" : ""
+                  ? isDarkMode
+                    ? "bg-gray-700"
+                    : "bg-blue-50"
+                  : ""
               }`}
             >
               <Icon

@@ -18,7 +18,7 @@ const SignupScreen = ({
   onSignup,
   onBackToLogin 
 }) => {
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,7 +28,7 @@ const SignupScreen = ({
   const { register, loading, error, clearError } = useAuth();
 
   const validateForm = () => {
-    if (!username.trim()) {
+    if (!name.trim()) {
       Alert.alert('Lỗi', 'Vui lòng nhập tên người dùng');
       return false;
     }
@@ -61,7 +61,7 @@ const SignupScreen = ({
 
     try {
       clearError();
-      const response = await register({ username, email, password });
+      const response = await register({ name, email, password });
       console.log('Signup successful:', response);
       onSignup && onSignup(response);
     } catch (err) {
@@ -123,8 +123,8 @@ const SignupScreen = ({
                 className="mr-3"
               />
               <TextInput
-                value={username}
-                onChangeText={setUsername}
+                value={name}
+                onChangeText={setName}
                 placeholder="Nhập tên người dùng"
                 placeholderTextColor={isDarkMode ? '#9ca3af' : '#9ca3af'}
                 className={`flex-1 text-base ${

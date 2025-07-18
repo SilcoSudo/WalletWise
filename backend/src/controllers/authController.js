@@ -5,7 +5,7 @@ const User = require('../models/User');
 // Register user
 const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
     
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -18,7 +18,7 @@ const register = async (req, res) => {
     
     // Create user
     const user = new User({
-      name: username,
+      name,
       email,
       password: hashedPassword,
       createdAt: new Date()
@@ -38,8 +38,9 @@ const register = async (req, res) => {
       token,
       user: {
         id: user._id,
-        username: user.name,
-        email: user.email
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
       }
     });
   } catch (error) {
@@ -77,8 +78,9 @@ const login = async (req, res) => {
       token,
       user: {
         id: user._id,
-        username: user.name,
-        email: user.email
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
       }
     });
   } catch (error) {
@@ -114,8 +116,9 @@ const guestLogin = async (req, res) => {
       token,
       user: {
         id: guestUser._id,
-        username: guestUser.name,
-        email: guestUser.email
+        name: guestUser.name,
+        email: guestUser.email,
+        avatar: guestUser.avatar
       }
     });
   } catch (error) {

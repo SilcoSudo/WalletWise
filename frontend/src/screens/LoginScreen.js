@@ -198,47 +198,6 @@ const LoginScreen = ({
             </Text>
           </View>
         </TouchableOpacity>
-
-        {/* Divider */}
-        <View className="flex-row items-center mb-6">
-          <View className={`flex-1 h-px ${
-            isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
-          }`} />
-          <Text className={`mx-4 text-sm ${
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          }`}>
-            hoặc
-          </Text>
-          <View className={`flex-1 h-px ${
-            isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
-          }`} />
-        </View>
-
-        {/* Social Login Buttons */}
-        <View className="space-y-3 mb-6">
-          <TouchableOpacity className={`flex-row items-center justify-center rounded-lg py-3 border ${
-            isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'
-          }`}>
-            <Icon name="google" size={20} color="#ea4335" className="mr-3" />
-            <Text className={`text-base font-medium ${
-              isDarkMode ? 'text-white' : 'text-gray-700'
-            }`}>
-              Tiếp tục với Google
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity className={`flex-row items-center justify-center rounded-lg py-3 border ${
-            isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'
-          }`}>
-            <Icon name="facebook" size={20} color="#1877f2" className="mr-3" />
-            <Text className={`text-base font-medium ${
-              isDarkMode ? 'text-white' : 'text-gray-700'
-            }`}>
-              Tiếp tục với Facebook
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Sign Up Link */}
         <View className="flex-row justify-center">
           <Text className={`text-base ${
