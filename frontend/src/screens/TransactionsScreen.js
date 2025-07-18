@@ -10,15 +10,12 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { formatCurrency } from "../utils/format";
 import TransactionCard from "../components/TransactionCard";
 import { useTransactionsContext } from "../hooks/useTransactions";
-import ModalEditTransaction from "../components/ModalEditTransaction";
 
-const TransactionsScreen = ({ isDarkMode = false }) => {
+const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchText, setSearchText] = useState("");
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
-  const { transactions, loading, error, updateTransaction, deleteTransaction } = useTransactionsContext();
+  const { transactions, loading, error } = useTransactionsContext();
 
   const tabs = [
     { key: "all", label: "Tất cả" },
@@ -91,180 +88,164 @@ const TransactionsScreen = ({ isDarkMode = false }) => {
   }
 
   return (
-    <>
-      <View className={`flex-1 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
-        {/* Search Bar */}
-        <View className="p-4">
-          <View
-            className={`relative ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm`}
-          >
-            <TextInput
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholder="Tìm kiếm giao dịch..."
-              className={`p-3 pl-10 ${
-                isDarkMode ? "text-white" : "text-gray-800"
-              }`}
-              placeholderTextColor={isDarkMode ? "#9ca3af" : "#6b7280"}
-            />
-            <Icon
-              name="search"
-              size={16}
-              color={isDarkMode ? "#9ca3af" : "#6b7280"}
-              style={{ position: "absolute", left: 12, top: 12 }}
-            />
-          </View>
+    <View className={`flex-1 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+      {/* Search Bar */}
+      <View className="p-4">
+        <View
+          className={`relative ${
+            isDarkMode ? "bg-gray-800" : "bg-white"
+          } rounded-lg shadow-sm`}
+        >
+          <TextInput
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="Tìm kiếm giao dịch..."
+            className={`p-3 pl-10 ${
+              isDarkMode ? "text-white" : "text-gray-800"
+            }`}
+            placeholderTextColor={isDarkMode ? "#9ca3af" : "#6b7280"}
+          />
+          <Icon
+            name="search"
+            size={16}
+            color={isDarkMode ? "#9ca3af" : "#6b7280"}
+            style={{ position: "absolute", left: 12, top: 12 }}
+          />
         </View>
+      </View>
 
-        {/* Filter Tabs */}
-        <View className="px-4 mb-4">
+      {/* Filter Tabs */}
+      <View className="px-4 mb-4">
+        <View
+          className={`flex-row rounded-lg p-1 ${
+            isDarkMode ? "bg-gray-800" : "bg-white"
+          } shadow-sm`}
+        >
+          {tabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={() => setActiveTab(tab.key)}
+              className={`flex-1 py-2 px-4 rounded-md ${
+                activeTab === tab.key ? "bg-blue-600" : "bg-transparent"
+              }`}
+            >
+              <Text
+                className={`text-center text-sm font-medium ${
+                  activeTab === tab.key
+                    ? "text-white"
+                    : isDarkMode
+                    ? "text-gray-400"
+                    : "text-gray-600"
+                }`}
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Summary Cards */}
+      <View className="px-4 mb-4">
+        <View className="flex-row space-x-3">
           <View
-            className={`flex-row rounded-lg p-1 ${
+            className={`flex-1 p-3 rounded-lg ${
               isDarkMode ? "bg-gray-800" : "bg-white"
             } shadow-sm`}
           >
-            {tabs.map((tab) => (
-              <TouchableOpacity
-                key={tab.key}
-                onPress={() => setActiveTab(tab.key)}
-                className={`flex-1 py-2 px-4 rounded-md ${
-                  activeTab === tab.key ? "bg-blue-600" : "bg-transparent"
-                }`}
-              >
+            <View className="flex-row items-center">
+              <View className="w-8 h-8 rounded-full bg-green-100 items-center justify-center mr-2">
+                <Icon name="arrow-down" size={14} color="#10b981" />
+              </View>
+              <View>
                 <Text
-                  className={`text-center text-sm font-medium ${
-                    activeTab === tab.key
-                      ? "text-white"
-                      : isDarkMode
-                      ? "text-gray-400"
-                      : "text-gray-600"
+                  className={`text-xs ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
                   }`}
                 >
-                  {tab.label}
+                  Thu nhập
                 </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Summary Cards */}
-        <View className="px-4 mb-4">
-          <View className="flex-row space-x-3">
-            <View
-              className={`flex-1 p-3 rounded-lg ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } shadow-sm`}
-            >
-              <View className="flex-row items-center">
-                <View className="w-8 h-8 rounded-full bg-green-100 items-center justify-center mr-2">
-                  <Icon name="arrow-down" size={14} color="#10b981" />
-                </View>
-                <View>
-                  <Text
-                    className={`text-xs ${
-                      isDarkMode ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    Thu nhập
-                  </Text>
-                  <Text
-                    className={`font-medium ${
-                      isDarkMode ? "text-white" : "text-gray-800"
-                    }`}
-                  >
-                    {formatCurrency(totalIncome)}
-                  </Text>
-                </View>
+                <Text
+                  className={`font-medium ${
+                    isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  {formatCurrency(totalIncome)}
+                </Text>
               </View>
             </View>
+          </View>
 
-            <View
-              className={`flex-1 p-3 rounded-lg ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } shadow-sm`}
-            >
-              <View className="flex-row items-center">
-                <View className="w-8 h-8 rounded-full bg-red-100 items-center justify-center mr-2">
-                  <Icon name="arrow-up" size={14} color="#ef4444" />
-                </View>
-                <View>
-                  <Text
-                    className={`text-xs ${
-                      isDarkMode ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    Chi tiêu
-                  </Text>
-                  <Text
-                    className={`font-medium ${
-                      isDarkMode ? "text-white" : "text-gray-800"
-                    }`}
-                  >
-                    {formatCurrency(totalExpense)}
-                  </Text>
-                </View>
+          <View
+            className={`flex-1 p-3 rounded-lg ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            } shadow-sm`}
+          >
+            <View className="flex-row items-center">
+              <View className="w-8 h-8 rounded-full bg-red-100 items-center justify-center mr-2">
+                <Icon name="arrow-up" size={14} color="#ef4444" />
+              </View>
+              <View>
+                <Text
+                  className={`text-xs ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  Chi tiêu
+                </Text>
+                <Text
+                  className={`font-medium ${
+                    isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  {formatCurrency(totalExpense)}
+                </Text>
               </View>
             </View>
           </View>
         </View>
-
-        {/* Transactions List */}
-        <ScrollView
-          className="flex-1 px-4"
-          showsVerticalScrollIndicator={false}
-        >
-          {filteredTransactions.length > 0 ? (
-            <View className="space-y-3 pb-20">
-              {filteredTransactions.map((transaction) => (
-                <TransactionCard
-                  key={transaction.id}
-                  transaction={transaction}
-                  isDarkMode={isDarkMode}
-                  onPress={() => {
-                    setSelectedTransaction(transaction);
-                    setEditModalVisible(true);
-                  }}
-                />
-              ))}
-            </View>
-          ) : (
-            <View className="flex-1 items-center justify-center py-20">
-              <Icon
-                name="search"
-                size={48}
-                color={isDarkMode ? "#4b5563" : "#d1d5db"}
-              />
-              <Text
-                className={`text-lg font-medium mt-4 ${
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                Không tìm thấy giao dịch
-              </Text>
-              <Text
-                className={`text-sm mt-2 ${
-                  isDarkMode ? "text-gray-500" : "text-gray-400"
-                }`}
-              >
-                Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-              </Text>
-            </View>
-          )}
-        </ScrollView>
       </View>
 
-      {/* ➕ Modal sửa / xóa */}
-      <ModalEditTransaction
-        visible={editModalVisible}
-        onClose={() => setEditModalVisible(false)}
-        transaction={selectedTransaction}
-        onUpdateTransaction={updateTransaction}
-        onDeleteTransaction={deleteTransaction}
-        isDarkMode={isDarkMode}
-      />
-    </>
+      {/* Transactions List */}
+      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+        {filteredTransactions.length > 0 ? (
+          <View className="space-y-3 pb-20">
+            {filteredTransactions.map((transaction) => (
+              <TransactionCard
+                key={transaction.id}
+                transaction={transaction}
+                isDarkMode={isDarkMode}
+                onPress={() => {
+                  onEditTransaction(transaction);
+                }}
+              />
+            ))}
+          </View>
+        ) : (
+          <View className="flex-1 items-center justify-center py-20">
+            <Icon
+              name="search"
+              size={48}
+              color={isDarkMode ? "#4b5563" : "#d1d5db"}
+            />
+            <Text
+              className={`text-lg font-medium mt-4 ${
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              Không tìm thấy giao dịch
+            </Text>
+            <Text
+              className={`text-sm mt-2 ${
+                isDarkMode ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
+              Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
