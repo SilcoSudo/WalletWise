@@ -4,16 +4,17 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { bottomNavItems } from '../utils/constants';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
- 
- const BottomNav = ({
-   activeScreen,
-   onNavigate,
-   onAddTransaction,
-   isDarkMode = false
- }) => {
-   const { t } = useTranslation();
-   const insets = useSafeAreaInsets();
+
+const BottomNav = ({ 
+  activeScreen, 
+  onNavigate, 
+  onAddTransaction, 
+  isDarkMode = false
+}) => {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   return (
     <View 

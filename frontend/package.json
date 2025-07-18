@@ -26,6 +26,7 @@
     "expo-location": "^18.1.5",
     "expo-notifications": "^0.31.3",
     "expo-sensors": "^14.1.4",
+    "expo-sharing": "^13.1.5",
     "expo-status-bar": "~2.2.3",
     "firebase": "^11.9.1",
     "i18next": "^25.3.2",

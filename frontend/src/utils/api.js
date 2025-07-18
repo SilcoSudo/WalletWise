@@ -166,6 +166,37 @@ export const profileAPI = {
     }),
 };
 
+// ==== API Báo cáo (Report) ====
+// Lấy danh sách báo cáo
+export const getReports = () => apiRequest("/reports");
+// Tạo báo cáo mới
+export const createReport = (data) => apiRequest("/reports", {
+  method: "POST",
+  body: JSON.stringify(data),
+});
+// Sửa báo cáo
+export const updateReport = (id, data) => apiRequest(`/reports/${id}`, {
+  method: "PUT",
+  body: JSON.stringify(data),
+});
+// Xóa báo cáo
+export const deleteReport = (id) => apiRequest(`/reports/${id}`, {
+  method: "DELETE",
+});
+// Export báo cáo ra CSV
+export const exportReport = (id) => apiRequest(`/reports/export/${id}`, {
+  responseType: "blob",
+});
+// Import báo cáo từ CSV (dữ liệu đã parse thành object)
+export const importReport = (data) => apiRequest("/reports/import", {
+  method: "POST",
+  body: JSON.stringify(data),
+});
+// Tải dữ liệu mẫu (chạy lại seedData.js)
+export const seedDataReport = () => apiRequest("/reports/seed", {
+  method: "POST",
+});
+
 export default {
   auth: authAPI,
   transactions: transactionsAPI,

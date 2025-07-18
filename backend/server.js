@@ -13,6 +13,7 @@ const statsRoutes = require('./src/routes/statsRoutes');
 const settingsRoutes = require('./src/routes/settingsRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
 const budgetRoutes = require('./src/routes/budgetRoutes');
+const reportRoutes = require('./src/routes/reportRoutes');
 
 // Import middleware
 const errorHandler = require('./src/middleware/errorMiddleware');
@@ -40,6 +41,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/budgets', budgetRoutes)
+app.use('/api/reports', reportRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
