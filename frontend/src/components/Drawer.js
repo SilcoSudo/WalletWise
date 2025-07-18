@@ -3,10 +3,11 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import { useTranslation } from 'react-i18next';
 import { navigationItems } from "../utils/constants";
-
-const Drawer = ({
-  isVisible,
+ 
+ const Drawer = ({
+   isVisible,
   onClose,
   activeScreen,
   onNavigate,
@@ -14,6 +15,7 @@ const Drawer = ({
   user,
   isDarkMode = false,
 }) => {
+  const { t } = useTranslation();
   console.log(
     "Drawer: isVisible =",
     isVisible,
@@ -73,9 +75,10 @@ const Drawer = ({
               />
             </View>
             <View>
-              {/* Hiển thị tên người dùng */}
-              <Text className={`text-sm font-medium text-gray-700 px-4 mb-2`}>
-                {user ? user.username || user.name : "Người dùng"}
+              <Text
+                className={`text-sm font-medium text-gray-700 px-4 mb-2 `}
+              >
+                {user ? user.username : t('drawer.user')}
               </Text>
               <Text className={`text-xs font-medium text-gray-700 px-4 mb-2 `}>
                 {user ? user.email : "user@example.com"}
@@ -121,7 +124,7 @@ const Drawer = ({
                     : "text-gray-700"
                 }`}
               >
-                {item.label}
+                {t(item.label)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -146,7 +149,7 @@ const Drawer = ({
                 isDarkMode ? "text-gray-300" : "text-gray-700"
               }`}
             >
-              Đăng xuất
+              {t('drawer.logout')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -157,7 +160,7 @@ const Drawer = ({
               isDarkMode ? "text-gray-400" : "text-gray-500"
             }`}
           >
-            Phiên bản 1.0.0
+            {t('drawer.version')}
           </Text>
         </View>
       </View>

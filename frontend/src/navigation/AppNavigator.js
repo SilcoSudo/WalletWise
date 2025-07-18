@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { View, StatusBar } from "react-native";
-import { useAuth } from "../hooks/useAuth";
-import { useTransactionsContext } from "../hooks/useTransactions";
-import HomeScreen from "../screens/HomeScreen";
-import TransactionsScreen from "../screens/TransactionsScreen";
-import StatisticsScreen from "../screens/StatisticsScreen";
-import SettingsScreen from "../screens/SettingsScreen";
+import React, { useState, useEffect } from 'react';
+import { View, StatusBar } from 'react-native';
+import { useAuth } from '../hooks/useAuth';
+import { useTransactionsContext } from '../hooks/useTransactions';
+import HomeScreen from '../screens/HomeScreen';
+import TransactionsScreen from '../screens/TransactionsScreen';
+import StatisticsScreen from '../screens/StatisticsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import CategoriesScreen from "../screens/CategoriesScreen";
-import Header from "../components/Header";
-import BottomNav from "../components/BottomNav";
-import Drawer from "../components/Drawer";
-import { SafeAreaView } from "react-native-safe-area-context";
+import Header from '../components/Header';
+import BottomNav from '../components/BottomNav';
+import Drawer from '../components/Drawer';
+import BudgetsScreen from '../screens/BudgetScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   const [currentScreen, setCurrentScreen] = useState("home");
@@ -101,7 +102,7 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
             }}
           />
         );
-      case "categories":
+       case "categories":
         return (
           <CategoriesScreen
             isDarkMode={isDarkMode}
@@ -111,7 +112,14 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
             }}
           />
         );
-      case "settings":
+      case 'budgets':
+        return (
+          <BudgetsScreen
+            isDarkMode={isDarkMode}
+          // nếu BudgetsScreen cần props khác thì truyền thêm ở đây
+          />
+        );
+      case 'settings':
         return (
           <SettingsScreen
             isDarkMode={isDarkMode}

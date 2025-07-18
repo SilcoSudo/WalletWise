@@ -3,12 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity, Switch, Modal, TextInput, Ale
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../hooks/useAuth";
-
-// Import AvatarPicker
+import { useTranslation } from 'react-i18next';
 import AvatarPicker from "../components/AvatarPicker";
-
-const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, navigation }) => {
-  const { user, updateUser, deleteUser, updatePassword, updateLanguage, updateNotificationSettings, refreshUserData } = useAuth();
+ 
+ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, navigation }) => {
+   const { t, i18n } = useTranslation();
+   const { user, updateUser, deleteUser, updatePassword, updateLanguage, updateNotificationSettings, refreshUserData } = useAuth();
 
   // States for modals
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
@@ -24,12 +24,13 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
   const [newPassword, setNewPassword] = useState("");
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);  // State for notifications
 
-  const [language, setLanguage] = useState("vi");  // State for language selection
+  const [language, setLanguage] = useState(i18n.language);  // State for language selection
 
   // Initialize settings from user data
   useEffect(() => {
     if (user?.language) {
       setLanguage(user.language);
+      i18n.changeLanguage(user.language);
     }
     if (user?.notifications?.enabled !== undefined) {
       setIsNotificationsEnabled(user.notifications.enabled);
@@ -44,34 +45,34 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
   }, [refreshUserData]);
   const settingsSections = [
     {
-      title: "Tài khoản",
+      title: t('settings.account'),
       items: [
-        { icon: "user", label: "Hồ sơ cá nhân", action: "profile" },
-        { icon: "shield-alt", label: "Bảo mật", action: "security" },
-        { icon: "bell", label: "Thông báo", action: "notifications" },  // Added notifications section
+        { icon: "user", label: t('settings.profile'), action: "profile" },
+        { icon: "shield-alt", label: t('settings.security'), action: "security" },
+        { icon: "bell", label: t('settings.notifications'), action: "notifications" },  // Added notifications section
       ],
     },
     {
-      title: "Ứng dụng",
+      title: t('settings.application'),
       items: [
-        { icon: "palette", label: "Giao diện", action: "theme" },
-        { icon: "language", label: "Ngôn ngữ", action: "language" },
+        { icon: "palette", label: t('settings.theme'), action: "theme" },
+        { icon: "language", label: t('settings.language'), action: "language" },
       ],
     },
     {
-      title: "Quản lý dữ liệu",
+      title: t('settings.dataManagement'),
       items: [
-        { icon: "download", label: "Xuất dữ liệu", action: "export", iconColor: "#10b981", bgColor: "bg-green-100" },
-        { icon: "upload", label: "Nhập dữ liệu", action: "import", iconColor: "#3b82f6", bgColor: "bg-blue-100" },
-        { icon: "trash-alt", label: "Xóa tất cả dữ liệu", action: "delete", iconColor: "#ef4444", bgColor: "bg-red-100" },
+        { icon: "download", label: t('settings.exportData'), action: "export", iconColor: "#10b981", bgColor: "bg-green-100" },
+        { icon: "upload", label: t('settings.importData'), action: "import", iconColor: "#3b82f6", bgColor: "bg-blue-100" },
+        { icon: "trash-alt", label: t('settings.deleteAllData'), action: "delete", iconColor: "#ef4444", bgColor: "bg-red-100" },
       ],
     },
     {
-      title: "Hỗ trợ",
+      title: t('settings.support'),
       items: [
-        { icon: "question-circle", label: "Trợ giúp", action: "help" },
-        { icon: "envelope", label: "Liên hệ", action: "contact" },
-        { icon: "star", label: "Đánh giá", action: "rate" },
+        { icon: "question-circle", label: t('settings.help'), action: "help" },
+        { icon: "envelope", label: t('settings.contact'), action: "contact" },
+        { icon: "star", label: t('settings.rate'), action: "rate" },
       ],
     },
   ];
@@ -186,7 +187,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
           className="rounded-lg p-4 shadow-sm"
         >
           <Text className="text-lg font-semibold mb-4 text-gray-800">
-            Tài khoản
+            {t('settings.account')}
           </Text>
           <View className="flex-row items-center mb-4">
             {/* Avatar Picker */}
@@ -212,7 +213,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
             className="border border-white/50 rounded-lg p-3 flex-row items-center justify-center bg-white/30"
           >
             <Icon name="user-edit" size={16} color="#6b7280" />
-            <Text className="ml-2 text-gray-700">Chỉnh sửa hồ sơ</Text>
+            <Text className="ml-2 text-gray-700">{t('settings.editProfile')}</Text>
           </TouchableOpacity>
         </LinearGradient>
       </View>
@@ -284,7 +285,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
         >
           <View className="flex-row items-center justify-center">
             <Icon name="sign-out-alt" size={16} color="#dc2626" />
-            <Text className="text-red-600 font-medium ml-2">Đăng xuất</Text>
+            <Text className="text-red-600 font-medium ml-2">{t('settings.logout')}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -296,7 +297,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
             isDarkMode ? "text-gray-500" : "text-gray-400"
           }`}
         >
-          Phiên bản 1.0.0
+          {t('settings.version')}
         </Text>
       </View>
 
@@ -310,7 +311,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className={`w-11/12 rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <Text className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              Chỉnh sửa hồ sơ
+              {t('settings.editProfileTitle')}
             </Text>
             
             {/* Avatar Picker trong modal chỉnh sửa hồ sơ */}
@@ -323,7 +324,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
             </View>
             <View className="mb-4">
               <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Tên người dùng
+                {t('settings.username')}
               </Text>
               <TextInput
                 value={name}
@@ -340,7 +341,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
             
             <View className="mb-6">
               <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Email
+                {t('settings.email')}
               </Text>
               <TextInput
                 value={newEmail}
@@ -361,13 +362,13 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
                 onPress={() => setIsProfileModalVisible(false)}
                 className={`px-4 py-2 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}
               >
-                <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Hủy</Text>
+                <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('settings.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSaveProfile}
                 className="px-4 py-2 bg-blue-600 rounded-lg"
               >
-                <Text className="text-white">Ok</Text>
+                <Text className="text-white">{t('settings.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -384,12 +385,12 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className={`w-11/12 rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <Text className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              Bảo mật
+              {t('settings.securityTitle')}
             </Text>
             
             <View className="mb-4">
               <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Mật khẩu hiện tại
+                {t('settings.currentPassword')}
               </Text>
               <TextInput
                 value={currentPassword}
@@ -407,7 +408,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
             
             <View className="mb-4">
               <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Mật khẩu mới
+                {t('settings.newPassword')}
               </Text>
               <TextInput
                 value={newPassword}
@@ -429,7 +430,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
             >
               <View className="flex-row items-center justify-center">
                 <Icon name="trash-alt" size={16} color="#dc2626" />
-                <Text className="text-red-600 font-medium ml-2">Xóa tài khoản</Text>
+                <Text className="text-red-600 font-medium ml-2">{t('settings.deleteAccount')}</Text>
               </View>
             </TouchableOpacity>
             
@@ -438,13 +439,13 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
                 onPress={() => setIsSecurityModalVisible(false)}
                 className={`px-4 py-2 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}
               >
-                <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Hủy</Text>
+                <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('settings.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSavePassword}
                 className="px-4 py-2 bg-blue-600 rounded-lg"
               >
-                <Text className="text-white">Đổi mật khẩu</Text>
+                <Text className="text-white">{t('settings.changePassword')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -461,13 +462,13 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className={`w-11/12 rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <Text className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              Cài đặt thông báo
+              {t('settings.notificationSettings')}
             </Text>
             
             <View className="space-y-4">
               <View className="flex-row items-center justify-between py-2">
                 <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Thông báo push
+                  {t('settings.pushNotifications')}
                 </Text>
                 <Switch
                   value={isNotificationsEnabled}
@@ -479,7 +480,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
               
               <View className="flex-row items-center justify-between py-2">
                 <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Thông báo email
+                  {t('settings.emailNotifications')}
                 </Text>
                 <Switch
                   value={true}
@@ -491,7 +492,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
               
               <View className="flex-row items-center justify-between py-2">
                 <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Cảnh báo giao dịch
+                  {t('settings.transactionAlerts')}
                 </Text>
                 <Switch
                   value={true}
@@ -503,7 +504,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
               
               <View className="flex-row items-center justify-between py-2">
                 <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Cảnh báo ngân sách
+                  {t('settings.budgetAlerts')}
                 </Text>
                 <Switch
                   value={true}
@@ -519,7 +520,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
                 onPress={() => setIsNotificationModalVisible(false)}
                 className="px-4 py-2 bg-blue-600 rounded-lg"
               >
-                <Text className="text-white">Đóng</Text>
+                <Text className="text-white">{t('settings.close')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -536,15 +537,13 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className={`w-11/12 rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <Text className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              Chọn ngôn ngữ
+              {t('settings.selectLanguage')}
             </Text>
             
             <View className="space-y-2">
               {[
-                { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-                { code: 'en', name: 'English', flag: '🇺🇸' },
-                { code: 'ja', name: '日本語', flag: '🇯🇵' },
-                { code: 'ko', name: '한국어', flag: '🇰🇷' },
+                { code: 'vi', name: t('settings.vietnamese'), flag: '🇻🇳' },
+                { code: 'en', name: t('settings.english'), flag: '🇺🇸' },
               ].map((lang) => (
                 <TouchableOpacity
                   key={lang.code}
@@ -552,9 +551,9 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
                     try {
                       await updateLanguage(lang.code);
                       setLanguage(lang.code);
-                      Alert.alert("Thông báo", `Đã chuyển sang ${lang.name}`);
+                      Alert.alert(t('settings.notification'), t('settings.languageChanged', { lang: lang.name }));
                     } catch (error) {
-                      Alert.alert("Lỗi", "Không thể thay đổi ngôn ngữ.");
+                      Alert.alert(t('settings.error'), t('settings.languageChangeError'));
                     }
                   }}
                   className={`flex-row items-center justify-between p-3 rounded-lg ${
@@ -585,7 +584,7 @@ const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, naviga
                 onPress={() => setIsLanguageModalVisible(false)}
                 className="px-4 py-2 bg-blue-600 rounded-lg"
               >
-                <Text className="text-white">Đóng</Text>
+                <Text className="text-white">{t('settings.close')}</Text>
               </TouchableOpacity>
             </View>
           </View>
