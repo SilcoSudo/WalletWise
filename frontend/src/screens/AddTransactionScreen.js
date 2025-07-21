@@ -60,9 +60,8 @@ const AddTransactionScreen = ({ onClose }) => {
   };
 
   return (
-    <SafeAreaView
-      className={`flex-1 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}
-    >
+    <View className={`flex-1 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
+     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
       <StatusBar
         barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -77,7 +76,7 @@ const AddTransactionScreen = ({ onClose }) => {
           Thêm giao dịch
         </Text>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        
           {/* Loại giao dịch */}
           <View className="mb-6">
             <Text
@@ -297,6 +296,9 @@ const AddTransactionScreen = ({ onClose }) => {
             onPress={handleSave}
             disabled={loading}
             className="mt-6"
+            style={{
+              marginBottom: 20,
+            }}
           >
             <LinearGradient
               colors={
@@ -311,9 +313,10 @@ const AddTransactionScreen = ({ onClose }) => {
               </Text>
             </LinearGradient>
           </TouchableOpacity>
-        </ScrollView>
+       
       </View>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 };
 

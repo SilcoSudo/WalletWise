@@ -84,36 +84,38 @@ const EditTransactionScreen = ({
   };
 
   return (
-    <SafeAreaView
-      className={`flex-1 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
-    >
-      <StatusBar
-        barStyle={isDarkMode ? "light-content" : "dark-content"}
-        backgroundColor={isDarkMode ? "#111827" : "#f9fafb"}
-      />
-
-      {/* Header */}
-      <View className={`${isDarkMode ? "bg-gray-800" : "bg-white"} shadow-sm`}>
-        <View className="flex-row items-center justify-between p-4">
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon
-              name="arrow-left"
-              size={24}
-              color={isDarkMode ? "#9ca3af" : "#6b7280"}
-            />
-          </TouchableOpacity>
-          <Text
-            className={`text-xl font-bold ${
-              isDarkMode ? "text-white" : "text-gray-800"
-            }`}
-          >
-            Sửa giao dịch
-          </Text>
-          <View style={{ width: 24 }} />
+    <View className={`flex-1 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
+      <ScrollView
+        showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        <StatusBar
+          barStyle={isDarkMode ? "light-content" : "dark-content"}
+          backgroundColor={isDarkMode ? "#111827" : "#f9fafb"}
+        />
+<View className="p-6">
+        {/* Header */}
+        <View
+          className={`${isDarkMode ? "bg-gray-800" : "bg-white"} shadow-sm`}
+        >
+          <View className="flex-row items-center justify-between p-4">
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Icon
+                name="arrow-left"
+                size={24}
+                color={isDarkMode ? "#9ca3af" : "#6b7280"}
+              />
+            </TouchableOpacity>
+            <Text
+              className={`text-xl font-bold ${
+                isDarkMode ? "text-white" : "text-gray-800"
+              }`}
+            >
+              Sửa giao dịch
+            </Text>
+            <View style={{ width: 24 }} />
+          </View>
         </View>
-      </View>
 
-      <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
         {/* Loại giao dịch */}
         <View className="mb-6">
           <Text
@@ -347,8 +349,9 @@ const EditTransactionScreen = ({
         >
           <Text className="text-red-500 font-semibold">Xoá giao dịch</Text>
         </TouchableOpacity>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

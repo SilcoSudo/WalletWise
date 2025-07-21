@@ -249,4 +249,9 @@ const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
   );
 };
 
+
+
+
 export default TransactionsScreen;
+
+
