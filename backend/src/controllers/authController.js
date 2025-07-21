@@ -1,10 +1,13 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const User = require('../models/User');
-const { sendVerificationEmail, sendResetPasswordEmail } = require('../utils/emailService');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const User = require("../models/User");
+const {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+} = require("../utils/emailService");
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 // Register user
 const register = async (req, res) => {
@@ -13,12 +16,12 @@ const register = async (req, res) => {
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email đã tồn tại' });
+      return res.status(400).json({ message: "Email đã tồn tại" });
     }
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     // Create email verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    const emailVerificationToken = crypto.randomBytes(32).toString("hex");
     const emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24h
     // Create user
     const user = new User({
@@ -28,32 +31,179 @@ const register = async (req, res) => {
       isEmailVerified: false,
       emailVerificationToken,
       emailVerificationExpires,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
     await user.save();
+
+    // Tạo các category mặc định cho user mới
+    const defaultCategories = [
+      // Expense
+      {
+        name: "Ăn uống",
+        type: "expense",
+        icon: "utensils",
+        color: "#dc2626",
+        bgColor: "#fee2e2",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Mua sắm",
+        type: "expense",
+        icon: "shopping-cart",
+        color: "#ca8a04",
+        bgColor: "#fef9c3",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Di chuyển",
+        type: "expense",
+        icon: "car",
+        color: "#0284c7",
+        bgColor: "#bae6fd",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Hóa đơn",
+        type: "expense",
+        icon: "file-invoice",
+        color: "#7c3aed",
+        bgColor: "#ddd6fe",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Giải trí",
+        type: "expense",
+        icon: "gamepad",
+        color: "#db2777",
+        bgColor: "#fce7f3",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Sức khỏe",
+        type: "expense",
+        icon: "heartbeat",
+        color: "#059669",
+        bgColor: "#bbf7d0",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Giáo dục",
+        type: "expense",
+        icon: "book",
+        color: "#d97706",
+        bgColor: "#fde68a",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Nhà ở",
+        type: "expense",
+        icon: "home",
+        color: "#9333ea",
+        bgColor: "#f3e8ff",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Du lịch",
+        type: "expense",
+        icon: "plane",
+        color: "#0284c7",
+        bgColor: "#bae6fd",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Khác (Chi)",
+        type: "expense",
+        icon: "ellipsis-h",
+        color: "#6b7280",
+        bgColor: "#e5e7eb",
+        editable: false,
+        deletable: false,
+      },
+      // Income
+      {
+        name: "Lương",
+        type: "income",
+        icon: "money-bill",
+        color: "#059669",
+        bgColor: "#d1fae5",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Thưởng",
+        type: "income",
+        icon: "gift",
+        color: "#ca8a04",
+        bgColor: "#fef9c3",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Đầu tư",
+        type: "income",
+        icon: "chart-line",
+        color: "#0284c7",
+        bgColor: "#bae6fd",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Quà tặng",
+        type: "income",
+        icon: "birthday-cake",
+        color: "#db2777",
+        bgColor: "#fce7f3",
+        editable: false,
+        deletable: false,
+      },
+      {
+        name: "Khác (Thu)",
+        type: "income",
+        icon: "ellipsis-h",
+        color: "#6b7280",
+        bgColor: "#e5e7eb",
+        editable: false,
+        deletable: false,
+      },
+    ];
+    const Category = require("../models/Category");
+    await Category.insertMany(
+      defaultCategories.map((cat) => ({ ...cat, userId: user._id }))
+    );
+
     // Send verification email
     const verifyLink = `http://${req.headers.host}/api/auth/verify-email?token=${emailVerificationToken}&email=${email}`;
     await sendVerificationEmail(email, verifyLink);
     // Generate token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "7d" }
     );
     res.status(201).json({
-      message: 'User created successfully. Please check your email to verify your account.',
+      message:
+        "User created successfully. Please check your email to verify your account.",
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        isEmailVerified: user.isEmailVerified
-      }
+        isEmailVerified: user.isEmailVerified,
+      },
     });
   } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Register error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -63,17 +213,20 @@ const verifyEmail = async (req, res) => {
     const { token, email } = req.query;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Không tìm thấy người dùng' });
+      return res.status(400).json({ message: "Không tìm thấy người dùng" });
     }
     // Nếu xác thực đổi mật khẩu
-    if (user.pendingNewPasswordToken === token && user.pendingNewPasswordExpires > Date.now()) {
+    if (
+      user.pendingNewPasswordToken === token &&
+      user.pendingNewPasswordExpires > Date.now()
+    ) {
       user.password = user.pendingNewPassword;
       user.pendingNewPassword = undefined;
       user.pendingNewPasswordToken = undefined;
       user.pendingNewPasswordExpires = undefined;
       await user.save();
       // Nếu là request từ trình duyệt (không phải API), trả về HTML đẹp
-      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+      if (req.headers.accept && req.headers.accept.includes("text/html")) {
         return res.send(`
           <html>
             <head>
@@ -88,20 +241,28 @@ const verifyEmail = async (req, res) => {
         `);
       }
       // Nếu là API (Accept: application/json)
-      return res.json({ message: 'Đổi mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.' });
+      return res.json({
+        message:
+          "Đổi mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.",
+      });
     }
     // Xác thực email như cũ
-    if (user.emailVerificationToken === token && user.emailVerificationExpires > Date.now()) {
+    if (
+      user.emailVerificationToken === token &&
+      user.emailVerificationExpires > Date.now()
+    ) {
       user.isEmailVerified = true;
       user.emailVerificationToken = undefined;
       user.emailVerificationExpires = undefined;
       await user.save();
-      return res.json({ message: 'Xác thực email thành công' });
+      return res.json({ message: "Xác thực email thành công" });
     }
-    return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+    return res
+      .status(400)
+      .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
   } catch (error) {
-    console.error('Verify email error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Verify email error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -111,22 +272,24 @@ const forgotPassword = async (req, res) => {
     const { email, newPassword } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Email không tồn tại' });
+      return res.status(400).json({ message: "Email không tồn tại" });
     }
     if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự' });
+      return res
+        .status(400)
+        .json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự" });
     }
-    const pendingNewPasswordToken = crypto.randomBytes(32).toString('hex');
+    const pendingNewPasswordToken = crypto.randomBytes(32).toString("hex");
     user.pendingNewPassword = await bcrypt.hash(newPassword, 10);
     user.pendingNewPasswordToken = pendingNewPasswordToken;
     user.pendingNewPasswordExpires = Date.now() + 60 * 60 * 1000; // 1h
     await user.save();
     const verifyLink = `http://${req.headers.host}/api/auth/verify-email?token=${pendingNewPasswordToken}&email=${email}`;
     await sendVerificationEmail(email, verifyLink);
-    res.json({ message: 'Đã gửi email xác thực. Vui lòng kiểm tra hộp thư.' });
+    res.json({ message: "Đã gửi email xác thực. Vui lòng kiểm tra hộp thư." });
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -134,18 +297,24 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { token, email, newPassword } = req.body;
-    const user = await User.findOne({ email, resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
+    const user = await User.findOne({
+      email,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
     if (!user) {
-      return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+      return res
+        .status(400)
+        .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
     }
     user.password = await bcrypt.hash(newPassword, 10);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
-    res.json({ message: 'Đặt lại mật khẩu thành công' });
+    res.json({ message: "Đặt lại mật khẩu thành công" });
   } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -156,33 +325,37 @@ const login = async (req, res) => {
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
+      return res
+        .status(400)
+        .json({ message: "Email hoặc mật khẩu không đúng" });
     }
     // Check password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
+      return res
+        .status(400)
+        .json({ message: "Email hoặc mật khẩu không đúng" });
     }
     // Generate token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "7d" }
     );
     res.json({
-      message: 'Login successful',
+      message: "Login successful",
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        isEmailVerified: user.isEmailVerified
-      }
+        isEmailVerified: user.isEmailVerified,
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -190,35 +363,184 @@ const login = async (req, res) => {
 const guestLogin = async (req, res) => {
   try {
     // Create or find guest user
-    let guestUser = await User.findOne({ email: 'guest@example.com' });
+    let guestUser = await User.findOne({ email: "guest@example.com" });
     if (!guestUser) {
       guestUser = new User({
-        name: 'Guest User',
-        email: 'guest@example.com',
-        password: await bcrypt.hash('guest123', 10),
-        createdAt: new Date()
+        name: "Guest User",
+        email: "guest@example.com",
+        password: await bcrypt.hash("guest123", 10),
+        createdAt: new Date(),
       });
       await guestUser.save();
     }
+
+    // Tạo category mặc định nếu chưa có cho guest
+    const Category = require("../models/Category");
+    const count = await Category.countDocuments({ userId: guestUser._id });
+    if (count === 0) {
+      const defaultCategories = [
+        // Expense
+        {
+          name: "Ăn uống",
+          type: "expense",
+          icon: "utensils",
+          color: "#dc2626",
+          bgColor: "#fee2e2",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Mua sắm",
+          type: "expense",
+          icon: "shopping-cart",
+          color: "#ca8a04",
+          bgColor: "#fef9c3",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Di chuyển",
+          type: "expense",
+          icon: "car",
+          color: "#0284c7",
+          bgColor: "#bae6fd",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Hóa đơn",
+          type: "expense",
+          icon: "file-invoice",
+          color: "#7c3aed",
+          bgColor: "#ddd6fe",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Giải trí",
+          type: "expense",
+          icon: "gamepad",
+          color: "#db2777",
+          bgColor: "#fce7f3",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Sức khỏe",
+          type: "expense",
+          icon: "heartbeat",
+          color: "#059669",
+          bgColor: "#bbf7d0",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Giáo dục",
+          type: "expense",
+          icon: "book",
+          color: "#d97706",
+          bgColor: "#fde68a",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Nhà ở",
+          type: "expense",
+          icon: "home",
+          color: "#9333ea",
+          bgColor: "#f3e8ff",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Du lịch",
+          type: "expense",
+          icon: "plane",
+          color: "#0284c7",
+          bgColor: "#bae6fd",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Khác (Chi)",
+          type: "expense",
+          icon: "ellipsis-h",
+          color: "#6b7280",
+          bgColor: "#e5e7eb",
+          editable: false,
+          deletable: false,
+        },
+        // Income
+        {
+          name: "Lương",
+          type: "income",
+          icon: "money-bill",
+          color: "#059669",
+          bgColor: "#d1fae5",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Thưởng",
+          type: "income",
+          icon: "gift",
+          color: "#ca8a04",
+          bgColor: "#fef9c3",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Đầu tư",
+          type: "income",
+          icon: "chart-line",
+          color: "#0284c7",
+          bgColor: "#bae6fd",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Quà tặng",
+          type: "income",
+          icon: "birthday-cake",
+          color: "#db2777",
+          bgColor: "#fce7f3",
+          editable: false,
+          deletable: false,
+        },
+        {
+          name: "Khác (Thu)",
+          type: "income",
+          icon: "ellipsis-h",
+          color: "#6b7280",
+          bgColor: "#e5e7eb",
+          editable: false,
+          deletable: false,
+        },
+      ];
+      await Category.insertMany(
+        defaultCategories.map((cat) => ({ ...cat, userId: guestUser._id }))
+      );
+    }
+
     const token = jwt.sign(
       { userId: guestUser._id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "7d" }
     );
     res.json({
-      message: 'Guest login successful',
+      message: "Guest login successful",
       token,
       user: {
         id: guestUser._id,
         name: guestUser.name,
         email: guestUser.email,
         avatar: guestUser.avatar,
-        isEmailVerified: guestUser.isEmailVerified
-      }
+        isEmailVerified: guestUser.isEmailVerified,
+      },
     });
   } catch (error) {
-    console.error('Guest login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Guest login error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -226,14 +548,20 @@ const guestLogin = async (req, res) => {
 const verifyResetPasswordToken = async (req, res) => {
   try {
     const { token, email } = req.query;
-    const user = await User.findOne({ email, resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
+    const user = await User.findOne({
+      email,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
     if (!user) {
-      return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+      return res
+        .status(400)
+        .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
     }
-    res.json({ message: 'Token hợp lệ. Bạn có thể đặt lại mật khẩu.' });
+    res.json({ message: "Token hợp lệ. Bạn có thể đặt lại mật khẩu." });
   } catch (error) {
-    console.error('Verify reset password token error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Verify reset password token error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -243,14 +571,14 @@ const resetPasswordDirect = async (req, res) => {
     const { email, newPassword } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Email không tồn tại' });
+      return res.status(400).json({ message: "Email không tồn tại" });
     }
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
-    res.json({ message: 'Đổi mật khẩu thành công' });
+    res.json({ message: "Đổi mật khẩu thành công" });
   } catch (error) {
-    console.error('Reset password direct error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Reset password direct error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -262,5 +590,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyResetPasswordToken,
-  resetPasswordDirect
+  resetPasswordDirect,
 };

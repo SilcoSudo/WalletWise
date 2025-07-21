@@ -1,9 +1,10 @@
 const Category = require("../models/Category");
 
-// Get all categories
+// Get all categories of current user
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const userId = req.user._id;
+    const categories = await Category.find({ userId });
     res.json(categories);
   } catch (error) {
     console.error("Get categories error:", error);
@@ -11,10 +12,11 @@ const getAllCategories = async (req, res) => {
   }
 };
 
-// Create new category
+// Create new category for current user
 const createCategory = async (req, res) => {
   try {
     const { name, type, icon, color, bgColor } = req.body;
+    const userId = req.user._id;
 
     const category = new Category({
       name,
@@ -24,6 +26,7 @@ const createCategory = async (req, res) => {
       bgColor,
       editable: true,
       deletable: true,
+      userId,
     });
 
     await category.save();
@@ -34,16 +37,19 @@ const createCategory = async (req, res) => {
   }
 };
 
-// Update category
+// Update category for current user
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, type, icon, color, bgColor } = req.body;
+    const userId = req.user._id;
 
-    // Kiểm tra category có tồn tại và có thể chỉnh sửa không
-    const existingCategory = await Category.findById(id);
+    // Chỉ cho phép chỉnh sửa category của user hiện tại
+    const existingCategory = await Category.findOne({ _id: id, userId });
     if (!existingCategory) {
-      return res.status(404).json({ message: "Category not found" });
+      return res
+        .status(404)
+        .json({ message: "Category not found or not yours" });
     }
 
     if (existingCategory.editable === false) {
@@ -63,15 +69,18 @@ const updateCategory = async (req, res) => {
   }
 };
 
-// Delete category
+// Delete category for current user
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user._id;
 
-    // Kiểm tra category có tồn tại và có thể xóa không
-    const existingCategory = await Category.findById(id);
+    // Chỉ cho phép xóa category của user hiện tại
+    const existingCategory = await Category.findOne({ _id: id, userId });
     if (!existingCategory) {
-      return res.status(404).json({ message: "Category not found" });
+      return res
+        .status(404)
+        .json({ message: "Category not found or not yours" });
     }
 
     if (existingCategory.deletable === false) {
