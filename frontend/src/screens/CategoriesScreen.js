@@ -245,9 +245,9 @@ const CategoriesScreen = ({ navigation }) => {
       // Sắp xếp: categories có thể edit lên đầu, không edit xuống cuối
       const aEditable = a.editable !== false && a.deletable !== false;
       const bEditable = b.editable !== false && b.deletable !== false;
-      
+
       if (aEditable && !bEditable) return -1; // a lên đầu
-      if (!aEditable && bEditable) return 1;  // b lên đầu
+      if (!aEditable && bEditable) return 1; // b lên đầu
       return 0; // giữ nguyên thứ tự nếu cùng loại
     });
 
@@ -363,9 +363,10 @@ const CategoriesScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - chuyển đổi giữa tab Chi tiêu và Thu nhập */}
       <View className="bg-white border-b border-gray-200">
         <View className="flex-row mx-4">
+          {/* Tab Chi tiêu */}
           <TouchableOpacity
             onPress={() => setActiveTab("expense")}
             className={`flex-1 py-3 ${
@@ -377,9 +378,11 @@ const CategoriesScreen = ({ navigation }) => {
                 activeTab === "expense" ? "text-red-500" : "text-gray-500"
               }`}
             >
+              {/* Hiển thị số lượng danh mục chi tiêu */}
               Chi tiêu ({categories.filter((c) => c.type === "expense").length})
             </Text>
           </TouchableOpacity>
+          {/* Tab Thu nhập */}
           <TouchableOpacity
             onPress={() => setActiveTab("income")}
             className={`flex-1 py-3 ${
@@ -391,6 +394,7 @@ const CategoriesScreen = ({ navigation }) => {
                 activeTab === "income" ? "text-green-500" : "text-gray-500"
               }`}
             >
+              {/* Hiển thị số lượng danh mục thu nhập */}
               Thu nhập ({categories.filter((c) => c.type === "income").length})
             </Text>
           </TouchableOpacity>
@@ -481,17 +485,23 @@ const CategoriesScreen = ({ navigation }) => {
                       }
                       className={`flex-1 py-3 px-4 rounded-lg ${
                         formData.type === type.value
-                          ? type.value === "expense" 
-                            ? "bg-red-500 shadow-sm" 
+                          ? type.value === "expense"
+                            ? "bg-red-500 shadow-sm"
                             : "bg-green-500 shadow-sm"
                           : "bg-transparent"
                       }`}
                       style={{
                         marginRight: index === 0 ? 4 : 0,
+                        // Nếu là phần tử đầu tiên (index === 0) thì margin phải bên phải là 4 để tách khỏi phần tử bên cạnh
+                        // Các phần tử còn lại thì marginRight là 0 để không bị lệch
+                        marginRight: index === 0 ? 4 : 0,
                         marginLeft: index === 1 ? 4 : 0,
-                        shadowColor: formData.type === type.value 
-                          ? (type.value === "expense" ? "#ef4444" : "#22c55e")
-                          : "transparent",
+                        shadowColor:
+                          formData.type === type.value
+                            ? type.value === "expense"
+                              ? "#ef4444"
+                              : "#22c55e"
+                            : "transparent",
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.1,
                         shadowRadius: 4,
@@ -501,10 +511,11 @@ const CategoriesScreen = ({ navigation }) => {
                       <Text
                         className={`text-center font-semibold ${
                           formData.type === type.value
-                            ? "text-white"
-                            : "text-gray-600"
+                            ? "text-white" // Nếu tab đang chọn thì chữ màu trắng
+                            : "text-gray-600" // Nếu không thì chữ màu xám
                         }`}
                       >
+                        {/* Hiển thị tên loại danh mục: Chi tiêu hoặc Thu nhập */}
                         {type.label}
                       </Text>
                     </TouchableOpacity>

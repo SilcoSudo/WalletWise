@@ -1,46 +1,52 @@
 const Category = require("../models/Category");
 
-// Get all categories of current user
+// Controller xử lý các API liên quan đến danh mục chi tiêu/thu nhập
+
+// Lấy tất cả danh mục của user hiện tại
+// Trả về mảng các danh mục (expense/income) thuộc về user
 const getAllCategories = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const categories = await Category.find({ userId });
-    res.json(categories);
+    const userId = req.user._id; // Lấy id user từ token
+    const categories = await Category.find({ userId }); // Tìm tất cả danh mục của user
+    res.json(categories); // Trả về cho client
   } catch (error) {
     console.error("Get categories error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Create new category for current user
+// Tạo mới một danh mục cho user hiện tại
+// Nhận dữ liệu từ body, lưu vào DB
 const createCategory = async (req, res) => {
   try {
     const { name, type, icon, color, bgColor } = req.body;
     const userId = req.user._id;
 
+    // Tạo instance mới cho danh mục
     const category = new Category({
       name,
       type,
-      icon: icon || "utensils",
+      icon: icon || "utensils", // Nếu không truyền icon thì mặc định
       color,
       bgColor,
-      editable: true,
+      editable: true, // Danh mục do user tạo luôn có thể sửa/xóa
       deletable: true,
       userId,
     });
 
-    await category.save();
-    res.status(201).json(category);
+    await category.save(); // Lưu vào DB
+    res.status(201).json(category); // Trả về cho client
   } catch (error) {
     console.error("Create category error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Update category for current user
+// Cập nhật thông tin danh mục cho user hiện tại
+// Chỉ cho phép sửa danh mục của chính user đó
 const updateCategory = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // Lấy id danh mục từ params
     const { name, type, icon, color, bgColor } = req.body;
     const userId = req.user._id;
 

@@ -1,38 +1,38 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react"; // Thư viện React và các hook quản lý state, ref, effect
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Modal,
-  Dimensions,
-  TouchableWithoutFeedback,
-  Animated,
+  View, // Container layout
+  Text, // Hiển thị text
+  ScrollView, // Scroll nội dung
+  TouchableOpacity, // Button cảm ứng
+  ActivityIndicator, // Loading spinner
+  Modal, // Modal popup
+  Dimensions, // Lấy kích thước màn hình
+  TouchableWithoutFeedback, // Bắt sự kiện chạm ngoài modal
+  Animated, // Hiệu ứng chuyển động
 } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome5";
-import { LinearGradient } from "expo-linear-gradient";
-import { formatCurrency } from "../utils/format";
-import { useCategories } from "../hooks/useCategories";
-import CategoryBadge from "../components/CategoryBadge";
-import TransactionCard from "../components/TransactionCard";
-import { useTransactionsContext } from "../hooks/useTransactions";
+import Icon from "react-native-vector-icons/FontAwesome5"; // Icon FontAwesome5 cho UI
+import { LinearGradient } from "expo-linear-gradient"; // Gradient cho card số dư
+import { formatCurrency } from "../utils/format"; // Hàm format số tiền
+import { useCategories } from "../hooks/useCategories"; // Hook lấy danh mục từ API/backend
+import CategoryBadge from "../components/CategoryBadge"; // Component hiển thị badge danh mục (không dùng trực tiếp ở đây)
+import TransactionCard from "../components/TransactionCard"; // Component hiển thị 1 giao dịch
+import { useTransactionsContext } from "../hooks/useTransactions"; // Hook lấy danh sách giao dịch từ API/backend
 
 const HomeScreen = ({
-  isDarkMode = false,
-  onViewAllTransactions,
-  onAddTransaction,
-  navigation,
+  isDarkMode = false, // Chế độ tối cho UI
+  onViewAllTransactions, // Hàm callback khi bấm "Xem tất cả giao dịch"
+  onAddTransaction, // Hàm callback khi thêm giao dịch mới
+  navigation, // Đối tượng điều hướng giữa các màn hình
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showAllCategories, setShowAllCategories] = useState(false);
-  const [modalCategory, setModalCategory] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [categoryTab, setCategoryTab] = useState("expense"); // State cho tab chi tiêu/thu nhập
-  const [modalTransactionsLimit, setModalTransactionsLimit] = useState(10);
-  const [showBalance, setShowBalance] = useState(false); // Mặc định ẩn
+  const [selectedCategory, setSelectedCategory] = useState(null); // Lưu danh mục đang được chọn để lọc giao dịch
+  const [showAllCategories, setShowAllCategories] = useState(false); // Hiển thị tất cả danh mục hay chỉ thường dùng
+  const [modalCategory, setModalCategory] = useState(null); // Danh mục đang mở modal chi tiết
+  const [modalVisible, setModalVisible] = useState(false); // Trạng thái hiển thị modal chi tiết danh mục
+  const [categoryTab, setCategoryTab] = useState("expense"); // Tab đang chọn: chi tiêu hay thu nhập
+  const [modalTransactionsLimit, setModalTransactionsLimit] = useState(10); // Số giao dịch hiển thị trong modal
+  const [showBalance, setShowBalance] = useState(false); // Ẩn/hiện số dư tài khoản
 
-  const selectedDate = new Date();
+  const selectedDate = new Date(); // Ngày hiện tại (không dùng trực tiếp)
   const { transactions, stats, loading, error } = useTransactionsContext();
   const {
     categories,
@@ -40,37 +40,48 @@ const HomeScreen = ({
     error: errorCategories,
   } = useCategories();
 
-  // Đếm số giao dịch cho từng category
+  // ================== PHẦN LOGIC VÀ HIỂN THỊ ==================
+  // Đếm số giao dịch cho từng category để xác định danh mục thường dùng
   const categoryUsage = {};
   transactions.forEach((t) => {
+    // Tăng số lượng giao dịch cho từng category
     categoryUsage[t.category] = (categoryUsage[t.category] || 0) + 1;
   });
 
+  // Lọc giao dịch theo danh mục được chọn (nếu có), nếu không thì lấy tất cả
   const filteredTransactions = selectedCategory
     ? transactions.filter((t) => t.category === selectedCategory)
     : transactions;
+  // Lấy 10 giao dịch gần nhất sau khi lọc
   const recentTransactions = filteredTransactions.slice(0, 10);
 
+  // Số lượng danh mục hiển thị trên mỗi hàng
   const CATEGORIES_PER_ROW = 4;
+  // Số lượng danh mục tối đa hiển thị khi không mở rộng
   const MAX_CATEGORIES = 8;
 
+  // Mảng danh mục sẽ hiển thị (thường dùng hoặc tất cả)
   let displayedCategories = [];
   if (!showAllCategories) {
-    // Sắp xếp theo số giao dịch giảm dần
+    // Nếu không mở rộng, sắp xếp danh mục theo số giao dịch giảm dần và lấy tối đa MAX_CATEGORIES
     displayedCategories = [...categories]
       .sort(
         (a, b) => (categoryUsage[b.name] || 0) - (categoryUsage[a.name] || 0)
       )
       .slice(0, MAX_CATEGORIES);
   } else {
+    // Nếu mở rộng, hiển thị tất cả danh mục
     displayedCategories = categories;
   }
 
+  // Hàm render các hàng danh mục, mỗi hàng có tối đa CATEGORIES_PER_ROW danh mục
   function renderCategoryRows(list) {
     const rows = [];
+    // Chia danh mục thành các hàng
     for (let i = 0; i < list.length; i += CATEGORIES_PER_ROW) {
       rows.push(list.slice(i, i + CATEGORIES_PER_ROW));
     }
+    // Render từng hàng
     return rows.map((row, rowIndex) => (
       <View
         key={rowIndex}
@@ -79,24 +90,29 @@ const HomeScreen = ({
           justifyContent: "space-between",
         }}
       >
+        {/* Render từng danh mục trong hàng */}
         {row.map((category) => (
           <TouchableOpacity
             key={category._id}
             className="items-center mb-4"
             style={{ width: 64 }}
             onPress={() => {
+              // Khi bấm vào danh mục, mở modal chi tiết danh mục
               setModalCategory(category);
-              slideAnim.setValue(Dimensions.get("window").height); // Đặt lại vị trí trước
-              setModalVisible(true); // Sau đó mới mở modal
+              // Đặt lại vị trí modal trước khi animate
+              slideAnim.setValue(Dimensions.get("window").height);
+              setModalVisible(true);
+              // Đợi modal render xong rồi animate slide lên
               setTimeout(() => {
                 Animated.timing(slideAnim, {
                   toValue: 0,
                   duration: 200,
                   useNativeDriver: true,
                 }).start();
-              }, 10); // Đợi modal render xong mới animate (tránh nhảy)
+              }, 10);
             }}
           >
+            {/* Vòng tròn icon danh mục */}
             <View
               className={`w-12 h-12 rounded-full items-center justify-center mb-2 ${
                 selectedCategory === category._id
@@ -111,6 +127,7 @@ const HomeScreen = ({
                 color={category.color || "#374151"}
               />
             </View>
+            {/* Tên danh mục */}
             <Text
               className="text-xs text-center text-gray-600"
               numberOfLines={2}
@@ -119,6 +136,7 @@ const HomeScreen = ({
             </Text>
           </TouchableOpacity>
         ))}
+        {/* Nếu hàng chưa đủ số lượng, thêm các ô trống để căn đều */}
         {row.length < CATEGORIES_PER_ROW &&
           Array.from({ length: CATEGORIES_PER_ROW - row.length }).map(
             (_, idx) => (
@@ -133,6 +151,7 @@ const HomeScreen = ({
     ));
   }
 
+  // Lấy danh mục chi tiêu và thu nhập theo tab và trạng thái mở rộng
   const expenseCategories = showAllCategories
     ? categories.filter((c) => c.type === "expense")
     : displayedCategories.filter((c) => c.type === "expense");
@@ -140,10 +159,12 @@ const HomeScreen = ({
     ? categories.filter((c) => c.type === "income")
     : displayedCategories.filter((c) => c.type === "income");
 
+  // Biến animation cho modal danh mục (slide lên/xuống)
   const slideAnim = useRef(
     new Animated.Value(Dimensions.get("window").height)
   ).current;
 
+  // Hàm đóng modal danh mục, reset lại các state liên quan
   const closeModal = () => {
     Animated.timing(slideAnim, {
       toValue: Dimensions.get("window").height,
@@ -156,16 +177,21 @@ const HomeScreen = ({
     });
   };
 
+  // Tính tổng thu nhập từ các giao dịch
   const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
 
+  // Tính tổng chi tiêu từ các giao dịch
   const totalExpense = transactions
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
 
+  // Tính số dư hiện tại
   const balance = totalIncome - totalExpense;
 
+  // ================== PHẦN HIỂN THỊ UI ==================
+  // Nếu đang loading và chưa có giao dịch, hiển thị spinner và thông báo
   if (loading && transactions.length === 0) {
     return (
       <View
@@ -181,6 +207,7 @@ const HomeScreen = ({
     );
   }
 
+  // Nếu có lỗi, hiển thị thông báo lỗi
   if (error) {
     return (
       <View
@@ -207,6 +234,7 @@ const HomeScreen = ({
     );
   }
 
+  // ================== PHẦN RETURN JSX ==================
   return (
     <>
       <ScrollView
