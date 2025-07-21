@@ -12,6 +12,7 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 import { categories } from "../utils/constants";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useCategories } from '../hooks/useCategories';
 
 const EditTransactionScreen = ({
   isDarkMode,
@@ -25,6 +26,8 @@ const EditTransactionScreen = ({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [type, setType] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { categories, loading: loadingCategories } = useCategories();
 
   useEffect(() => {
     if (transaction) {
@@ -274,52 +277,48 @@ const EditTransactionScreen = ({
 
         {/* Danh mục */}
         <View className="mb-6">
-          <Text
-            className={`text-lg font-semibold mb-3 ${
-              isDarkMode ? "text-white" : "text-gray-800"
-            }`}
-          >
-            Danh mục
-          </Text>
+          <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? "text-white" : "text-gray-800"}`}>Danh mục</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {categories
-              .filter((category) => category.type === type)
-              .map((category) => (
-                <TouchableOpacity
-                  key={category.id}
-                  onPress={() => setSelectedCategory(category.name)}
-                  className={`mr-3 p-3 rounded-lg border-2 ${
-                    selectedCategory === category.name
-                      ? "border-blue-500 bg-blue-50"
-                      : isDarkMode
-                      ? "border-gray-600 bg-gray-700"
-                      : "border-gray-300 bg-gray-50"
-                  }`}
-                >
-                  <View className="items-center">
-                    <View
-                      className={`w-10 h-10 rounded-full ${category.color} items-center justify-center mb-2`}
-                    >
-                      <Icon
-                        name={category.icon}
-                        size={18}
-                        className={category.iconColor}
-                      />
-                    </View>
-                    <Text
-                      className={`text-xs text-center ${
-                        selectedCategory === category.name
-                          ? "text-blue-600 font-medium"
-                          : isDarkMode
-                          ? "text-gray-300"
-                          : "text-gray-600"
-                      }`}
-                    >
-                      {category.name}
-                    </Text>
+            {loadingCategories ? (
+              <Text className={isDarkMode ? "text-white" : "text-gray-800"}>Đang tải...</Text>
+            ) : categories.filter((category) => category.type === type).map((category) => (
+              <TouchableOpacity
+                key={category._id || category.id}
+                onPress={() => setSelectedCategory(category.name)}
+                className={`mr-3 p-3 rounded-lg border-2 ${
+                  selectedCategory === category.name
+                    ? "border-blue-500 bg-blue-50"
+                    : isDarkMode
+                    ? "border-gray-600 bg-gray-700"
+                    : "border-gray-300 bg-gray-50"
+                }`}
+              >
+                <View className="items-center">
+                  <View
+                    className={`w-10 h-10 rounded-full ${category.color} items-center justify-center mb-2`}
+                    style={{ backgroundColor: category.bgColor || undefined }}
+                  >
+                    <Icon
+                      name={category.icon}
+                      size={18}
+                      className={category.iconColor}
+                      color={category.color || undefined}
+                    />
                   </View>
-                </TouchableOpacity>
-              ))}
+                  <Text
+                    className={`text-xs text-center ${
+                      selectedCategory === category.name
+                        ? "text-blue-600 font-medium"
+                        : isDarkMode
+                        ? "text-gray-300"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {category.name}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
           </ScrollView>
         </View>
 

@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://10.66.208.136:5000/api";
+const API_BASE_URL = "http://10.66.165.112:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -230,6 +230,24 @@ export const seedDataReport = () => apiRequest("/reports/seed", {
   method: "POST",
 });
 
+export const budgetsAPI = {
+  getAll: () => apiRequest("/budgets"),
+  create: (data) =>
+    apiRequest("/budgets", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id, data) =>
+    apiRequest(`/budgets/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (id) =>
+    apiRequest(`/budgets/${id}`, {
+      method: "DELETE",
+    }),
+};
+
 export default {
   auth: authAPI,
   transactions: transactionsAPI,
@@ -237,4 +255,5 @@ export default {
   categories: categoriesAPI,
   settings: settingsAPI,
   profile: profileAPI,
+  budgets: budgetsAPI,
 };

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
-import { categories } from "../utils/constants";
+import { useCategories } from '../hooks/useCategories';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ModalEditTransaction = ({
@@ -27,6 +27,8 @@ const ModalEditTransaction = ({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [type, setType] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { categories, loading: loadingCategories } = useCategories();
 
   useEffect(() => {
     if (transaction) {

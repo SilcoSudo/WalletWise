@@ -18,21 +18,21 @@ async function enrichBudget(b) {
   }
   const expired = Date.now() > expiry;
 
-  // 2. Lookup transactions → categories → match theo tên category
-  const agg = await Transaction.aggregate([
-    {
-      $lookup: {
-        from: 'categories',        // tên collection Category trong Mongo
-        localField: 'categoryId',
-        foreignField: '_id',
-        as: 'cat'
-      }
-    },
-    { $unwind: '$cat' },
-    { $match: { 'cat.name': b.category } },  // khớp tên danh mục
-    { $group: { _id: null, total: { $sum: '$amount' } } }
-  ]);
-  const spent = agg[0]?.total || 0;
+  // 2. Lookup transactions theo categoryId (id)
+  let categoryId;
+  try {
+    categoryId = new mongoose.Types.ObjectId(b.category);
+  } catch {
+    categoryId = null;
+  }
+  let spent = 0;
+  if (categoryId) {
+    const agg = await Transaction.aggregate([
+      { $match: { categoryId, type: 'expense' } },
+      { $group: { _id: null, total: { $sum: { $abs: '$amount' } } } }
+    ]);
+    spent = agg[0]?.total || 0;
+  }
 
   // 3. Tính %
   const percent   = b.limit > 0 ? Math.round(spent / b.limit * 100) : 0;

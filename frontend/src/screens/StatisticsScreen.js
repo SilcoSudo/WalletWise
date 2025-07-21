@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, ScrollView as RNScrollView } from 'react-native';
 import { PieChart, BarChart } from 'react-native-chart-kit';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { formatCurrency, formatCurrencyShort } from '../utils/format';
-import { categories } from '../utils/constants';
-import { useTransactionsContext } from '../hooks/useTransactions';
+import { useCategories } from '../hooks/useCategories';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, format } from 'date-fns';
+import { useTransactionsContext } from '../hooks/useTransactions';
 
 const { width } = Dimensions.get('window');
 
@@ -14,6 +14,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
   const [activeStatsTab, setActiveStatsTab] = useState('weekly');
   // Lấy dữ liệu giao dịch, thống kê, trạng thái loading, lỗi từ context
   const { transactions, stats, loading, error } = useTransactionsContext();
+  const { categories, loading: loadingCategories } = useCategories();
 
   // Danh sách các tab thống kê
   const statsTabs = [
@@ -132,12 +133,11 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
     formatXLabel: (value) => value,
   };
 
-  if (loading && transactions.length === 0) {
+  if (loading || loadingCategories) {
     return (
-      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <Text className={`${isDarkMode ? 'text-white' : 'text-gray-600'}`}>
-          Đang tải dữ liệu...
-        </Text>
+      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}> 
+        <ActivityIndicator size="large" color={isDarkMode ? '#fff' : '#2563eb'} />
+        <Text className={`${isDarkMode ? 'text-white' : 'text-gray-600'} mt-4`}>Đang tải dữ liệu...</Text>
       </View>
     );
   }
@@ -160,19 +160,21 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
     <ScrollView 
       className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 48 }}
     >
       {/* Stats Tabs */}
-      <View className="p-4">
+      <View className="p-4" style={{ paddingTop: 20 }}>
         <View className={`flex-row rounded-lg p-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           {statsTabs.map((tab) => (
             <TouchableOpacity
               key={tab.key}
               onPress={() => setActiveStatsTab(tab.key)}
-              className={`flex-1 py-2 px-4 rounded-md ${
+              className={`flex-1 py-2 px-2 rounded-md mx-1 ${
                 activeStatsTab === tab.key 
-                  ? 'bg-blue-600' 
+                  ? 'bg-blue-600 shadow-md' 
                   : 'bg-transparent'
               }`}
+              style={{ elevation: activeStatsTab === tab.key ? 2 : 0 }}
             >
               <Text className={`text-center text-sm font-medium ${
                 activeStatsTab === tab.key 
@@ -187,70 +189,59 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
       </View>
 
       {/* Summary Cards */}
-      <View className="px-4 mb-6">
-        <Text className={`text-lg font-semibold mb-3 ${
+      <View className="px-3 mb-4">
+        <Text className={`text-base font-semibold mb-2 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
           Tổng quan {getTabDisplayName(activeStatsTab)}
         </Text>
-        
         <View className="flex-row space-x-3">
-          <View className={`flex-1 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Thu nhập
-              </Text>
-              <Icon name="arrow-down" size={16} color="#10b981" />
+          <View className={`flex-1 p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+            <View className="flex-row items-center justify-between mb-1">
+              <Text className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Thu nhập</Text>
+              <Icon name="arrow-down" size={14} color="#10b981" />
             </View>
-            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              {formatCurrency(totalIncome)}
-            </Text>
+            <Text className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalIncome)}</Text>
           </View>
-          
-          <View className={`flex-1 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Chi tiêu
-              </Text>
-              <Icon name="arrow-up" size={16} color="#ef4444" />
+          <View className={`flex-1 p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+            <View className="flex-row items-center justify-between mb-1">
+              <Text className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Chi tiêu</Text>
+              <Icon name="arrow-up" size={14} color="#ef4444" />
             </View>
-            <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-              {formatCurrency(totalExpense)}
-            </Text>
+            <Text className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalExpense)}</Text>
           </View>
         </View>
       </View>
 
       {/* Pie Chart */}
-      <View className="px-4 mb-6">
-        <Text className={`text-lg font-semibold mb-3 ${
+      <View className="px-3 mb-4">
+        <Text className={`text-base font-semibold mb-2 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
           Chi tiêu theo danh mục
         </Text>
-        
-        <View className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+        <View className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           {pieChartData.length > 0 ? (
             <View>
-              {/* Biểu đồ tròn */}
-              <PieChart
-                data={pieChartData}
-                width={width - 48}
-                height={220}
-                chartConfig={chartConfig}
-                accessor="amount"
-                backgroundColor="transparent"
-                paddingLeft="15"
-                absolute
-                hasLegend={false}
-              />
-              {/* Custom legend dưới biểu đồ */}
-              <View style={{ marginTop: 16 }}>
+              <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                <PieChart
+                  data={pieChartData}
+                  width={width - 48}
+                  height={200}
+                  chartConfig={chartConfig}
+                  accessor="amount"
+                  backgroundColor="transparent"
+                  paddingLeft="10"
+                  absolute
+                  hasLegend={false}
+                />
+              </View>
+              <View style={{ marginTop: 12 }}>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                   {pieChartData.map((item, idx) => (
-                    <View key={idx} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 8, paddingHorizontal: 4 }}>
-                      <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: item.color, marginRight: 8 }} />
-                      <Text style={{ color: isDarkMode ? '#fff' : '#444', fontSize: 12, flex: 1 }} numberOfLines={2}>
+                    <View key={idx} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 6, paddingHorizontal: 2 }}>
+                      <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: item.color, marginRight: 6 }} />
+                      <Text style={{ color: isDarkMode ? '#fff' : '#444', fontSize: 11, flex: 1 }} numberOfLines={2}>
                         {item.displayName}
                       </Text>
                     </View>
@@ -259,13 +250,13 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
               </View>
             </View>
           ) : (
-            <View className="items-center justify-center h-44">
+            <View className="items-center justify-center h-36">
               <Icon 
                 name="chart-pie" 
-                size={48} 
+                size={40} 
                 color={isDarkMode ? '#4b5563' : '#d1d5db'} 
               />
-              <Text className={`text-lg font-medium mt-4 ${
+              <Text className={`text-base font-medium mt-3 ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Không có dữ liệu
@@ -276,24 +267,28 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
       </View>
 
       {/* Bar Chart */}
-      <View className="px-4 mb-20">
-        <Text className={`text-lg font-semibold mb-3 ${
+      <View className="px-3 mb-12">
+        <Text className={`text-base font-semibold mb-2 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
           {activeStatsTab === 'weekly' && 'Chi tiêu theo ngày trong tuần'}
           {activeStatsTab === 'monthly' && 'Chi tiêu theo ngày'}
           {activeStatsTab === 'yearly' && 'Chi tiêu theo tháng'}
         </Text>
-        
-        <View className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
-          <BarChart
-            data={barChartData}
-            width={width - 48}
-            height={220}
-            chartConfig={chartConfig}
-            verticalLabelRotation={30}
-            fromZero
-          />
+        <View className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+          <RNScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <BarChart
+              data={barChartData}
+              width={Math.max(width - 48, barChartData.labels.length * 40)}
+              height={180}
+              chartConfig={{
+                ...chartConfig,
+                propsForLabels: { fontSize: 10 },
+              }}
+              verticalLabelRotation={45}
+              fromZero
+            />
+          </RNScrollView>
         </View>
       </View>
     </ScrollView>

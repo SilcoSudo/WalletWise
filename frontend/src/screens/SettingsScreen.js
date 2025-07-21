@@ -49,7 +49,7 @@ import AvatarPicker from "../components/AvatarPicker";
       items: [
         { icon: "user", label: t('settings.profile'), action: "profile" },
         { icon: "shield-alt", label: t('settings.security'), action: "security" },
-        { icon: "bell", label: t('settings.notifications'), action: "notifications" },  // Added notifications section
+        // { icon: "bell", label: t('settings.notifications'), action: "notifications" },  // Added notifications section
       ],
     },
     {
@@ -62,8 +62,8 @@ import AvatarPicker from "../components/AvatarPicker";
     {
       title: t('settings.dataManagement'),
       items: [
-        { icon: "download", label: "Xuất dữ liệu", action: "export", iconColor: "#10b981", bgColor: "bg-green-100" },
-        { icon: "upload", label: "Nhập dữ liệu", action: "import", iconColor: "#3b82f6", bgColor: "bg-blue-100" },
+        // { icon: "download", label: "Xuất dữ liệu", action: "export", iconColor: "#10b981", bgColor: "bg-green-100" },
+        // { icon: "upload", label: "Nhập dữ liệu", action: "import", iconColor: "#3b82f6", bgColor: "bg-blue-100" },
         { icon: "file-alt", label: "Báo cáo", action: "reports", iconColor: "#2563eb", bgColor: "bg-blue-100" },
         { icon: "trash-alt", label: "Xóa tất cả dữ liệu", action: "delete", iconColor: "#ef4444", bgColor: "bg-red-100" },
       ],
@@ -84,7 +84,7 @@ import AvatarPicker from "../components/AvatarPicker";
         setIsProfileModalVisible(true);  // Show Profile modal
         break;
       case 'security':
-        navigation.navigate && navigation.navigate('Security'); // Điều hướng sang màn hình SecurityScreen
+        navigation.navigate && navigation.navigate('security'); // Điều hướng sang màn hình SecurityScreen (chữ thường)
         break;
       case 'notifications':
         setIsNotificationModalVisible(true);  // Show Notification modal
@@ -139,29 +139,6 @@ import AvatarPicker from "../components/AvatarPicker";
     } catch (error) {
       Alert.alert("Lỗi", error.message || "Không thể thay đổi mật khẩu.");
     }
-  };
-
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      "Xác nhận xóa tài khoản",
-      "Bạn có chắc chắn muốn xóa tài khoản của mình? Hành động này không thể hoàn tác.",
-      [
-        {
-          text: "Hủy",
-          onPress: () => { },
-          style: "cancel",
-        },
-        {
-          text: "Xóa tài khoản",
-          onPress: () => {
-            deleteUser(user?.id);  // Call the deleteUser function from your auth hook
-            Alert.alert("Thông báo", "Tài khoản của bạn đã được xóa.");
-            onLogout();  // Log out after account deletion
-          },
-          style: "destructive",
-        },
-      ]
-    );
   };
 
   const handleToggleNotifications = async () => {
@@ -427,16 +404,6 @@ import AvatarPicker from "../components/AvatarPicker";
                 secureTextEntry
               />
             </View>
-            
-            <TouchableOpacity
-              onPress={handleDeleteAccount}
-              className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg"
-            >
-              <View className="flex-row items-center justify-center">
-                <Icon name="trash-alt" size={16} color="#dc2626" />
-                <Text className="text-red-600 font-medium ml-2">{t('settings.deleteAccount')}</Text>
-              </View>
-            </TouchableOpacity>
             
             <View className="flex-row justify-end space-x-3">
               <TouchableOpacity

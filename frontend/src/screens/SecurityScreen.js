@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAuth } from '../hooks/useAuth';
 
 const SecurityScreen = ({ navigation }) => {
-  const { updatePassword } = useAuth();
+  const { updatePassword, deleteUser } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,6 +32,29 @@ const SecurityScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Xác nhận xóa tài khoản',
+      'Bạn có chắc chắn muốn xóa tài khoản của mình? Hành động này không thể hoàn tác.',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Xóa tài khoản',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteUser();
+              Alert.alert('Thông báo', 'Tài khoản của bạn đã được xóa.');
+              navigation?.navigate?.('settings');
+            } catch (err) {
+              Alert.alert('Lỗi', err.message || 'Không thể xóa tài khoản.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -67,6 +90,12 @@ const SecurityScreen = ({ navigation }) => {
         disabled={loading}
       >
         {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold">Đổi mật khẩu</Text>}
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={handleDeleteAccount}
+        className="w-full bg-red-500 rounded-lg py-3 items-center mb-3"
+      >
+        <Text className="text-white font-semibold">Xóa tài khoản</Text>
       </TouchableOpacity>
       <TouchableOpacity className="mt-6" onPress={() => navigation?.goBack?.()}>
         <Text className="text-blue-600">Quay lại</Text>

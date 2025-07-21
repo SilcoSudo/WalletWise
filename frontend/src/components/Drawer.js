@@ -76,11 +76,14 @@ import { navigationItems } from "../utils/constants";
             </View>
             <View>
               <Text
-                className={`text-sm font-medium text-gray-700 px-4 mb-2 `}
+                className={`text-base font-semibold text-gray-800 px-0 mb-0`}
               >
-                {user ? user.username : t('drawer.user')}
+                {user ? user.name || user.username || user.user || user.email : t('drawer.user')}
               </Text>
-              <Text className={`text-xs font-medium text-gray-700 px-4 mb-2 `}>
+              <Text className={`text-xs text-gray-600 px-0 mt-1`}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {user ? user.email : "user@example.com"}
               </Text>
             </View>

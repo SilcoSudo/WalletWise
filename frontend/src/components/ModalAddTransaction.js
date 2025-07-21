@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { categories } from '../utils/constants';
+import { useCategories } from '../hooks/useCategories';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,6 +29,8 @@ const ModalAddTransaction = ({
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const { categories, loading: loadingCategories } = useCategories();
 
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);

@@ -14,7 +14,6 @@ import Icon from "react-native-vector-icons/FontAwesome5"; // Icon FontAwesome5 
 import { LinearGradient } from "expo-linear-gradient"; // Gradient cho card số dư
 import { formatCurrency } from "../utils/format"; // Hàm format số tiền
 import { useCategories } from "../hooks/useCategories"; // Hook lấy danh mục từ API/backend
-import CategoryBadge from "../components/CategoryBadge"; // Component hiển thị badge danh mục (không dùng trực tiếp ở đây)
 import TransactionCard from "../components/TransactionCard"; // Component hiển thị 1 giao dịch
 import { useTransactionsContext } from "../hooks/useTransactions"; // Hook lấy danh sách giao dịch từ API/backend
 

@@ -15,6 +15,7 @@ import Drawer from "../components/Drawer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AddTransactionScreen from "../screens/AddTransactionScreen";
 import EditTransactionScreen from "../screens/EditTransactionScreen";
+import SecurityScreen from '../screens/SecurityScreen';
 
 const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   const [currentScreen, setCurrentScreen] = useState("home");
@@ -171,6 +172,16 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
             navigation={{
               navigate: handleScreenChange,
               goBack: () => setCurrentScreen("transactions"),
+            }}
+          />
+        );
+      case "security":
+        return (
+          <SecurityScreen
+            isDarkMode={isDarkMode}
+            navigation={{
+              navigate: handleScreenChange,
+              goBack: () => setCurrentScreen("settings"),
             }}
           />
         );
