@@ -6,6 +6,14 @@ const userSchema = new mongoose.Schema({
   password: String,
   avatar: String, // Thêm trường avatar
   language: { type: String, default: 'vi' },
+  isEmailVerified: { type: Boolean, default: false },
+  emailVerificationToken: String,
+  emailVerificationExpires: Date,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+  pendingNewPassword: { type: String },
+  pendingNewPasswordToken: { type: String },
+  pendingNewPasswordExpires: { type: Date },
   notifications: {
     enabled: { type: Boolean, default: true },
     pushNotifications: { type: Boolean, default: true },

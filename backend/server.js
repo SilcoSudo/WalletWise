@@ -1,6 +1,10 @@
+require('dotenv').config(); // PHẢI là dòng đầu tiên!
+
+console.log('EMAIL_USER:', process.env.EMAIL_USER);
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
+
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 
 // Import database connection
 const connectDB = require('./src/config/db');

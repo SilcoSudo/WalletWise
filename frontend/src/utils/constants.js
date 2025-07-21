@@ -148,6 +148,7 @@ export const navigationItems = [
   { key: 'transactions', label: 'navigation.transactions', icon: 'exchange-alt' },
   { key: 'statistics', label: 'navigation.statistics', icon: 'chart-pie' },
   { key: 'budgets', label: 'navigation.budgets',   icon: 'piggy-bank' },
+  { key: "categories", label: "Danh mục", icon: "tags" },
   { key: 'settings', label: 'navigation.settings', icon: 'cog' },
 ];
 

@@ -84,7 +84,7 @@ import AvatarPicker from "../components/AvatarPicker";
         setIsProfileModalVisible(true);  // Show Profile modal
         break;
       case 'security':
-        setIsSecurityModalVisible(true);  // Show Security modal
+        setIsSecurityModalVisible(true); // Mở modal đổi mật khẩu
         break;
       case 'notifications':
         setIsNotificationModalVisible(true);  // Show Notification modal

@@ -17,7 +17,8 @@ const LoginScreen = ({
   isDarkMode = false,
   onLogin,
   onSignup,
-  onGuestLogin 
+  onGuestLogin,
+  onForgotPassword // Thêm prop này
 }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -211,6 +212,10 @@ const LoginScreen = ({
             </Text>
           </TouchableOpacity>
         </View>
+        {/* Forgot Password Link */}
+        <TouchableOpacity onPress={onForgotPassword} style={{ alignSelf: 'flex-end', marginTop: 8, marginBottom: 16 }}>
+          <Text style={{ color: '#2563eb', fontSize: 14 }}>Quên mật khẩu?</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

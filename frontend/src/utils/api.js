@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://192.168.114.129:5000/api";
+const API_BASE_URL = "http://192.168.1.17:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -76,6 +76,39 @@ export const authAPI = {
     apiRequest("/auth/guest", {
       method: "POST",
     }),
+
+  verifyEmail: (data) =>
+    apiRequest("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  forgotPassword: (data) =>
+    apiRequest("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  resetPassword: (data) =>
+    apiRequest("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  resetPasswordDirect: async ({ email, newPassword }) => {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password-direct`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "API request failed");
+    }
+    return data;
+  },
 };
 
 // Transactions API

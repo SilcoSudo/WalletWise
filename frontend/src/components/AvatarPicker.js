@@ -34,7 +34,7 @@ const uploadImageToImgBB = async (imageUri) => {
     // Đọc file thành base64 với timeout
     const base64 = await Promise.race([
       FileSystem.readAsStringAsync(optimizedImageUri, {
-        encoding: FileSystem.EncodingType.Base64,
+      encoding: FileSystem.EncodingType.Base64,
       }),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Read timeout')), 10000)
@@ -51,11 +51,11 @@ const uploadImageToImgBB = async (imageUri) => {
     // Gửi lên ImgBB với timeout và retry
     const response = await Promise.race([
       fetch(IMGBB_API_URL, {
-        method: "POST",
-        body: formData,
-        headers: {
-          Accept: "application/json",
-        },
+      method: "POST",
+      body: formData,
+      headers: {
+        Accept: "application/json",
+      },
       }),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Upload timeout')), 15000)
