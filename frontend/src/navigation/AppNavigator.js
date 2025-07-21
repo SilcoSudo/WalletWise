@@ -13,13 +13,16 @@ import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import Drawer from "../components/Drawer";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AddTransactionScreen from "../screens/AddTransactionScreen";
+import EditTransactionScreen from "../screens/EditTransactionScreen";
 
 const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   const [currentScreen, setCurrentScreen] = useState("home");
   const [showDrawer, setShowDrawer] = useState(false);
-
   const { user, isAuthenticated, logout } = useAuth();
-  const { refreshData } = useTransactionsContext();
+  const { refreshData, updateTransaction, deleteTransaction } =
+    useTransactionsContext();
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   // Debug authentication state changes
   useEffect(() => {
@@ -37,6 +40,7 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
       console.log("AppNavigator: User not authenticated, resetting app state");
       setCurrentScreen("home");
       setShowDrawer(false);
+      setSelectedTransaction(null);
     } else {
       console.log(
         "AppNavigator: User authenticated, ensuring navigation to home"
@@ -51,6 +55,7 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
       await logout();
       console.log("AppNavigator: Logout successful");
       setCurrentScreen("home");
+      setSelectedTransaction(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -67,7 +72,12 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   };
 
   const handleAddPress = () => {
-    onAddTransaction && onAddTransaction();
+    setCurrentScreen("addTransaction");
+  };
+
+  const handleEditTransaction = (transaction) => {
+    setSelectedTransaction(transaction);
+    setCurrentScreen("editTransaction");
   };
 
   // Main app screens - only render if user is authenticated
@@ -87,6 +97,7 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
           <TransactionsScreen
             isDarkMode={isDarkMode}
             onAddTransaction={handleAddPress}
+            onEditTransaction={handleEditTransaction}
             navigation={{
               navigate: handleScreenChange,
               goBack: () => setCurrentScreen("home"),
@@ -143,6 +154,27 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
             }}
           />
         );
+      case "addTransaction":
+        return (
+          <AddTransactionScreen
+            isDarkMode={isDarkMode}
+            onClose={() => setCurrentScreen("home")}
+          />
+        );
+      case "editTransaction":
+        return (
+          <EditTransactionScreen
+            isDarkMode={isDarkMode}
+            transaction={selectedTransaction}
+            onUpdateTransaction={updateTransaction}
+            onDeleteTransaction={deleteTransaction}
+            navigation={{
+              navigate: handleScreenChange,
+              goBack: () => setCurrentScreen("transactions"),
+            }}
+          />
+        );
+
       default:
         return (
           <HomeScreen
