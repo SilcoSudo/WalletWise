@@ -64,8 +64,8 @@ import AvatarPicker from "../components/AvatarPicker";
       items: [
         // { icon: "download", label: "Xuất dữ liệu", action: "export", iconColor: "#10b981", bgColor: "bg-green-100" },
         // { icon: "upload", label: "Nhập dữ liệu", action: "import", iconColor: "#3b82f6", bgColor: "bg-blue-100" },
-        { icon: "file-alt", label: "Báo cáo", action: "reports", iconColor: "#2563eb", bgColor: "bg-blue-100" },
-        { icon: "trash-alt", label: "Xóa tất cả dữ liệu", action: "delete", iconColor: "#ef4444", bgColor: "bg-red-100" },
+        { icon: "file-alt", label: t('settings.reports'), action: "reports", iconColor: "#2563eb", bgColor: "bg-blue-100" },
+        { icon: "trash-alt", label: t('settings.deleteAllData'), action: "delete", iconColor: "#ef4444", bgColor: "bg-red-100" },
       ],
     },
     {
@@ -181,7 +181,7 @@ import AvatarPicker from "../components/AvatarPicker";
             </View>
             <View>
               <Text className="font-medium text-gray-800">
-                {name || 'Người dùng'}
+                {name || t('drawer.user')}
               </Text>
               <Text className="text-sm text-gray-600">
                 {user?.email || 'email@example.com'}
@@ -315,7 +315,7 @@ import AvatarPicker from "../components/AvatarPicker";
                     ? 'border-gray-600 bg-gray-700 text-white' 
                     : 'border-gray-300 bg-white text-gray-800'
                 }`}
-                placeholder="Nhập tên người dùng"
+                placeholder={t('settings.enterUsername')}
                 placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
               />
             </View>
@@ -332,7 +332,7 @@ import AvatarPicker from "../components/AvatarPicker";
                     ? 'border-gray-600 bg-gray-700 text-white' 
                     : 'border-gray-300 bg-white text-gray-800'
                 }`}
-                placeholder="Nhập email"
+                placeholder={t('settings.enterEmail')}
                 placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
                 keyboardType="email-address"
               />
@@ -381,7 +381,7 @@ import AvatarPicker from "../components/AvatarPicker";
                     ? 'border-gray-600 bg-gray-700 text-white' 
                     : 'border-gray-300 bg-white text-gray-800'
                 }`}
-                placeholder="Nhập mật khẩu hiện tại"
+                placeholder={t('settings.enterCurrentPassword')}
                 placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
                 secureTextEntry
               />
@@ -399,7 +399,7 @@ import AvatarPicker from "../components/AvatarPicker";
                     ? 'border-gray-600 bg-gray-700 text-white' 
                     : 'border-gray-300 bg-white text-gray-800'
                 }`}
-                placeholder="Nhập mật khẩu mới"
+                placeholder={t('settings.enterNewPassword')}
                 placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
                 secureTextEntry
               />

@@ -7,12 +7,15 @@ import {
   ScrollView,
   Alert,
   StatusBar,
+  Platform,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 import { categories } from "../utils/constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCategories } from '../hooks/useCategories';
+import { useTranslation } from 'react-i18next';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const EditTransactionScreen = ({
   isDarkMode,
@@ -26,8 +29,11 @@ const EditTransactionScreen = ({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [type, setType] = useState("");
   const [loading, setLoading] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const { categories, loading: loadingCategories } = useCategories();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (transaction) {
@@ -35,8 +41,16 @@ const EditTransactionScreen = ({
       setDescription(transaction.description || "");
       setSelectedCategory(transaction.category || "");
       setType(transaction.type || "expense");
+      setDate(transaction.date ? new Date(transaction.date) : new Date());
     }
   }, [transaction]);
+
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
 
   const handleUpdate = async () => {
     if (!amount || !description || !selectedCategory) {
@@ -57,7 +71,7 @@ const EditTransactionScreen = ({
         description,
         category: selectedCategory,
         type: type,
-        date: transaction.date || new Date(),
+        date: date,
       });
       navigation.goBack();
     } catch (err) {
@@ -113,7 +127,7 @@ const EditTransactionScreen = ({
                 isDarkMode ? "text-white" : "text-gray-800"
               }`}
             >
-              Sửa giao dịch
+              {t('transaction.edit')}
             </Text>
             <View style={{ width: 24 }} />
           </View>
@@ -126,7 +140,7 @@ const EditTransactionScreen = ({
               isDarkMode ? "text-white" : "text-gray-800"
             }`}
           >
-            Loại giao dịch
+            {t('transaction.type')}
           </Text>
           <View className="flex-row space-x-3">
             <TouchableOpacity
@@ -210,7 +224,7 @@ const EditTransactionScreen = ({
               isDarkMode ? "text-white" : "text-gray-800"
             }`}
           >
-            Số tiền
+            {t('transaction.amount')}
           </Text>
           <View
             className={`flex-row items-center border rounded-lg px-3 py-3 ${
@@ -228,7 +242,7 @@ const EditTransactionScreen = ({
             <TextInput
               value={amount}
               onChangeText={setAmount}
-              placeholder="Nhập số tiền"
+              placeholder={t('transaction.amountPlaceholder')}
               placeholderTextColor={isDarkMode ? "#9ca3af" : "#9ca3af"}
               className={`flex-1 text-lg ${
                 isDarkMode ? "text-white" : "text-gray-900"
@@ -252,7 +266,7 @@ const EditTransactionScreen = ({
               isDarkMode ? "text-white" : "text-gray-800"
             }`}
           >
-            Mô tả
+            {t('transaction.description')}
           </Text>
           <View
             className={`border rounded-lg px-3 py-3 ${
@@ -264,7 +278,7 @@ const EditTransactionScreen = ({
             <TextInput
               value={description}
               onChangeText={setDescription}
-              placeholder="Nhập mô tả giao dịch"
+              placeholder={t('transaction.descriptionPlaceholder')}
               placeholderTextColor={isDarkMode ? "#9ca3af" : "#9ca3af"}
               className={`text-base ${
                 isDarkMode ? "text-white" : "text-gray-900"
@@ -277,7 +291,7 @@ const EditTransactionScreen = ({
 
         {/* Danh mục */}
         <View className="mb-6">
-          <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? "text-white" : "text-gray-800"}`}>Danh mục</Text>
+          <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? "text-white" : "text-gray-800"}`}>{t('transaction.category')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {loadingCategories ? (
               <Text className={isDarkMode ? "text-white" : "text-gray-800"}>Đang tải...</Text>
@@ -322,6 +336,32 @@ const EditTransactionScreen = ({
           </ScrollView>
         </View>
 
+        {/* Ngày giao dịch */}
+        <View className="mb-6">
+          <Text className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+            {t('transaction.date') || 'Ngày giao dịch'}
+          </Text>
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
+            className={`border rounded-lg px-3 py-3 ${
+              isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+            }`}
+          >
+            <Text className={`text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {date ? `${('0' + date.getDate()).slice(-2)}/${('0' + (date.getMonth()+1)).slice(-2)}/${date.getFullYear()}` : ''}
+            </Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onChangeDate}
+              maximumDate={new Date()}
+            />
+          )}
+        </View>
+
         {/* Nút lưu */}
         <TouchableOpacity
           onPress={handleUpdate}
@@ -336,7 +376,7 @@ const EditTransactionScreen = ({
             className="rounded-lg py-4 items-center"
           >
             <Text className="text-white text-lg font-semibold">
-              {loading ? "Đang lưu..." : "Lưu thay đổi"}
+              {loading ? "Đang lưu..." : t('common.save')}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -346,7 +386,7 @@ const EditTransactionScreen = ({
           onPress={handleDelete}
           className="mt-4 items-center py-3 rounded-lg border border-red-500 mb-8"
         >
-          <Text className="text-red-500 font-semibold">Xoá giao dịch</Text>
+          <Text className="text-red-500 font-semibold">{t('common.delete')}</Text>
         </TouchableOpacity>
         </View>
       </ScrollView>

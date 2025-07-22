@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import * as Linking from 'expo-linking';
 import { authAPI } from '../utils/api';
+import { useTranslation } from 'react-i18next';
 
 const VerifyEmailScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ const VerifyEmailScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+  const { t } = useTranslation();
 
   // Tự động lấy token/email từ URL nếu có
   useEffect(() => {
@@ -32,9 +34,9 @@ const VerifyEmailScreen = ({ navigation }) => {
     setSuccess(null);
     try {
       await authAPI.verifyEmail({ email: emailParam || email, token: tokenParam || token });
-      setSuccess('Xác thực email thành công! Bạn có thể đăng nhập.');
+      setSuccess(t('verifyEmail.success'));
     } catch (err) {
-      setError(err.message || 'Xác thực thất bại.');
+      setError(err.message || t('verifyEmail.error'));
     } finally {
       setLoading(false);
     }
@@ -42,13 +44,13 @@ const VerifyEmailScreen = ({ navigation }) => {
 
   return (
     <View className="flex-1 justify-center items-center px-6 bg-white">
-      <Text className="text-2xl font-bold mb-4">Xác thực Email</Text>
+      <Text className="text-2xl font-bold mb-4">{t('verifyEmail.title')}</Text>
       <Text className="mb-6 text-center text-gray-600">
-        Vui lòng kiểm tra email của bạn và nhập mã xác thực hoặc nhấn vào link trong email.
+        {t('verifyEmail.instructions')}
       </Text>
       <TextInput
         className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Email"
+        placeholder={t('verifyEmail.emailPlaceholder')}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -56,7 +58,7 @@ const VerifyEmailScreen = ({ navigation }) => {
       />
       <TextInput
         className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Mã xác thực (token)"
+        placeholder={t('verifyEmail.tokenPlaceholder')}
         value={token}
         onChangeText={setToken}
         autoCapitalize="none"
@@ -66,12 +68,12 @@ const VerifyEmailScreen = ({ navigation }) => {
         onPress={() => handleVerify()}
         disabled={loading}
       >
-        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold">Xác thực</Text>}
+        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold">{t('verifyEmail.verifyButton')}</Text>}
       </TouchableOpacity>
       {success && <Text className="text-green-600 mt-2">{success}</Text>}
       {error && <Text className="text-red-600 mt-2">{error}</Text>}
       <TouchableOpacity className="mt-6" onPress={() => navigation?.goBack?.()}>
-        <Text className="text-blue-600">Quay lại đăng nhập</Text>
+        <Text className="text-blue-600">{t('verifyEmail.backToLogin')}</Text>
       </TouchableOpacity>
     </View>
   );

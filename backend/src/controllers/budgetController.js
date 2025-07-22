@@ -55,7 +55,7 @@ async function enrichBudget(b) {
 exports.getBudgets = async (req, res) => {
   try {
     const status  = req.query.status || 'Active';
-    const budgets = await Budget.find().sort('-createdAt');
+    const budgets = await Budget.find({ userId: req.user._id }).sort('-createdAt');
     const detailed = await Promise.all(budgets.map(enrichBudget));
 
     // Lọc theo status
@@ -75,7 +75,7 @@ exports.getBudgets = async (req, res) => {
 exports.createBudget = async (req, res) => {
   try {
     const { category, limit, period, alert } = req.body;
-    const b = await Budget.create({ category, limit, period, alert });
+    const b = await Budget.create({ userId: req.user._id, category, limit, period, alert });
     res.status(201).json({
       id:        b._id,
       category:  b.category,

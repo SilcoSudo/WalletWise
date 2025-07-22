@@ -13,13 +13,27 @@ exports.getProfile = async (req, res) => {
 
 // Update user profile
 exports.updateProfile = async (req, res) => {
-  const { name, email, avatar } = req.body;
+  const { name, email, avatar, currentPassword } = req.body;
   try {
     const user = await User.findById(req.user.id);
 
     if (user) {
+      // Nếu đổi email, yêu cầu nhập đúng mật khẩu hiện tại
+      if (email && email !== user.email) {
+        if (!currentPassword) {
+          return res.status(400).json({ message: 'Vui lòng nhập mật khẩu hiện tại để đổi email' });
+        }
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ message: 'Mật khẩu hiện tại không đúng' });
+        }
+        const existing = await User.findOne({ email });
+        if (existing && existing._id.toString() !== user._id.toString()) {
+          return res.status(400).json({ message: 'Email đã tồn tại' });
+        }
+        user.email = email;
+      }
       user.name = name || user.name;
-      user.email = email || user.email;
       if (avatar !== undefined) user.avatar = avatar;
       const updatedUser = await user.save();
       res.json(updatedUser);

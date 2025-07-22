@@ -12,7 +12,7 @@ import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 
 const Stack = createStackNavigator();
 
-const AuthNavigator = ({ isDarkMode = false, onAuthSuccess }) => {
+const AuthNavigator = ({ isDarkMode = false, onAuthSuccess, onToggleDarkMode }) => {
   return (
     <SafeAreaProvider>
       <NavigationContainer independent>
@@ -34,7 +34,7 @@ const AuthNavigator = ({ isDarkMode = false, onAuthSuccess }) => {
                 onGuestLogin={onAuthSuccess}
                 onVerifyEmail={() => props.navigation.navigate('VerifyEmail')}
                 onForgotPassword={() => props.navigation.navigate('ForgotPassword')}
-                // sẽ thêm onForgotPassword sau
+                onToggleDarkMode={onToggleDarkMode}
               />
             )}
           </Stack.Screen>
@@ -45,6 +45,7 @@ const AuthNavigator = ({ isDarkMode = false, onAuthSuccess }) => {
                 isDarkMode={isDarkMode}
                 onSignup={onAuthSuccess}
                 onBackToLogin={() => props.navigation.navigate('Login')}
+                onToggleDarkMode={onToggleDarkMode}
               />
             )}
           </Stack.Screen>
@@ -54,6 +55,8 @@ const AuthNavigator = ({ isDarkMode = false, onAuthSuccess }) => {
               <ForgotPasswordScreen
                 {...props}
                 onResetPassword={() => props.navigation.navigate('ResetPassword')}
+                isDarkMode={isDarkMode}
+                onToggleDarkMode={onToggleDarkMode}
               />
             )}
           </Stack.Screen>

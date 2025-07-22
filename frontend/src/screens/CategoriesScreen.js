@@ -14,9 +14,13 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 import { categoriesAPI } from "../utils/api";
 import { useCategories } from "../hooks/useCategories";
+import { useTranslation } from 'react-i18next';
+import { useTransactionsContext } from '../hooks/useTransactions';
 
 const CategoriesScreen = ({ navigation }) => {
   const { categories, loading, error, refreshCategories } = useCategories();
+  const { refreshData } = useTransactionsContext();
+  const { t } = useTranslation();
 
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -187,7 +191,7 @@ const CategoriesScreen = ({ navigation }) => {
   const handleDelete = (category) => {
     Alert.alert(
       "Xác nhận xóa",
-      `Bạn có chắc muốn xóa danh mục "${category.name}"?`,
+      `Bạn có chắc muốn xóa danh mục "${category.name}"?\n\nNếu xóa, tất cả các giao dịch và ngân sách liên quan đến danh mục này sẽ bị xóa vĩnh viễn. Bạn có chắc chắn muốn tiếp tục?`,
       [
         { text: "Hủy", style: "cancel" },
         {
@@ -196,8 +200,9 @@ const CategoriesScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               await categoriesAPI.delete(category._id);
-              Alert.alert("Thành công", "Đã xóa danh mục");
+              Alert.alert("Thành công", "Đã xóa danh mục và các dữ liệu liên quan");
               refreshCategories(); // Refresh categories thông qua hook
+              refreshData(); // Refresh transactions & stats sau khi xóa category
             } catch (error) {
               Alert.alert("Lỗi", "Không thể xóa danh mục");
               console.error("Delete category error:", error);
@@ -355,7 +360,7 @@ const CategoriesScreen = ({ navigation }) => {
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">
-            Quản lý danh mục
+            {t('categories.manage')}
           </Text>
           <TouchableOpacity onPress={openCreateModal} className="p-2">
             <Ionicons name="add" size={24} color="#3b82f6" />
@@ -379,7 +384,7 @@ const CategoriesScreen = ({ navigation }) => {
               }`}
             >
               {/* Hiển thị số lượng danh mục chi tiêu */}
-              Chi tiêu ({categories.filter((c) => c.type === "expense").length})
+              {t('categories.expense')} ({categories.filter((c) => c.type === "expense").length})
             </Text>
           </TouchableOpacity>
           {/* Tab Thu nhập */}
@@ -395,7 +400,7 @@ const CategoriesScreen = ({ navigation }) => {
               }`}
             >
               {/* Hiển thị số lượng danh mục thu nhập */}
-              Thu nhập ({categories.filter((c) => c.type === "income").length})
+              {t('categories.income')} ({categories.filter((c) => c.type === "income").length})
             </Text>
           </TouchableOpacity>
         </View>
@@ -413,16 +418,14 @@ const CategoriesScreen = ({ navigation }) => {
           <View className="items-center justify-center py-20">
             <Ionicons name="folder-open-outline" size={64} color="#9ca3af" />
             <Text className="text-gray-500 text-lg mt-4">
-              Chưa có danh mục{" "}
-              {activeTab === "expense" ? "chi tiêu" : "thu nhập"} nào
+              {t('categories.empty')} {activeTab === "expense" ? t('categories.expense') : t('categories.income')}
             </Text>
             <TouchableOpacity
               onPress={openCreateModal}
               className="mt-4 bg-blue-500 px-6 py-2 rounded-lg"
             >
               <Text className="text-white font-semibold">
-                Tạo danh mục {activeTab === "expense" ? "chi tiêu" : "thu nhập"}{" "}
-                đầu tiên
+                {t('categories.add')} {activeTab === "expense" ? t('categories.expense') : t('categories.income')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -443,10 +446,12 @@ const CategoriesScreen = ({ navigation }) => {
                 onPress={() => setShowModal(false)}
                 className="p-2"
               >
-                <Text className="text-blue-500 text-base">Hủy</Text>
+                <Text className="text-blue-500 text-base">
+                  {t('common.cancel')}
+                </Text>
               </TouchableOpacity>
               <Text className="text-xl font-bold text-gray-900">
-                {editingCategory ? "Sửa danh mục" : "Tạo danh mục"}
+                {editingCategory ? t('categories.edit') : t('categories.add')}
               </Text>
               <View className="p-2" style={{ width: 44 }}>
                 {/* Spacer để căn giữa title */}
@@ -458,14 +463,14 @@ const CategoriesScreen = ({ navigation }) => {
             {/* Category Name */}
             <View className="mb-6">
               <Text className="text-gray-700 font-semibold mb-2">
-                Tên danh mục
+                {t('categories.name')}
               </Text>
               <TextInput
                 value={formData.name}
                 onChangeText={(text) =>
                   setFormData((prev) => ({ ...prev, name: text }))
                 }
-                placeholder="Nhập tên danh mục"
+                placeholder={t('categories.namePlaceholder')}
                 className="border border-gray-300 rounded-lg px-4 py-3 text-base"
               />
             </View>
@@ -474,7 +479,7 @@ const CategoriesScreen = ({ navigation }) => {
             {!editingCategory && (
               <View className="mb-6">
                 <Text className="text-gray-700 font-semibold mb-2">
-                  Loại danh mục
+                  {t('categories.type')}
                 </Text>
                 <View className="flex-row bg-gray-100 rounded-xl p-1">
                   {categoryTypes.map((type, index) => (
@@ -527,7 +532,7 @@ const CategoriesScreen = ({ navigation }) => {
             {/* Category Icon */}
             <View className="mb-6">
               <Text className="text-gray-700 font-semibold mb-2">
-                Biểu tượng
+                {t('categories.icon')}
               </Text>
               <View className="flex-row flex-wrap">
                 {(editingCategory
@@ -557,7 +562,7 @@ const CategoriesScreen = ({ navigation }) => {
               </View>
               {!editingCategory && getAvailableIcons().length === 0 && (
                 <Text className="text-gray-500 text-sm mt-2">
-                  Tất cả icon đã được sử dụng. Bạn có thể dùng lại icon đã có.
+                  {t('categories.allIconsUsed')}
                 </Text>
               )}
               {!editingCategory && getAvailableIcons().length === 0 && (
@@ -591,7 +596,9 @@ const CategoriesScreen = ({ navigation }) => {
 
             {/* Category Color */}
             <View className="mb-6">
-              <Text className="text-gray-700 font-semibold mb-2">Màu sắc</Text>
+              <Text className="text-gray-700 font-semibold mb-2">
+                {t('categories.color')}
+              </Text>
               <View className="flex-row flex-wrap">
                 {categoryColors.map((color, index) => (
                   <TouchableOpacity
@@ -617,7 +624,9 @@ const CategoriesScreen = ({ navigation }) => {
 
               {/* Preview */}
               <View className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <Text className="text-gray-600 text-sm mb-3">Xem trước:</Text>
+                <Text className="text-gray-600 text-sm mb-3">
+                  {t('categories.preview')}
+                </Text>
                 <View className="flex-row items-center">
                   <View
                     className="w-12 h-12 rounded-full items-center justify-center mr-4"
@@ -630,7 +639,7 @@ const CategoriesScreen = ({ navigation }) => {
                     />
                   </View>
                   <Text className="text-gray-900 font-medium text-base">
-                    {formData.name || "Tên danh mục"}
+                    {formData.name || t('categories.categoryName')}
                   </Text>
                 </View>
               </View>
@@ -644,7 +653,7 @@ const CategoriesScreen = ({ navigation }) => {
                   className="rounded-lg py-3 items-center"
                 >
                   <Text className="text-gray-800 text-base font-semibold">
-                    {editingCategory ? "Cập nhật danh mục" : "Tạo danh mục"}
+                    {t('common.save')}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>

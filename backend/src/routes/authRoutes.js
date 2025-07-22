@@ -11,6 +11,9 @@ router.post('/verify-email', verifyEmail);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/reset-password-direct', resetPasswordDirect);
+router.post('/logout', (req, res) => {
+  res.json({ message: 'Logged out' });
+});
 router.get('/verify-email', verifyEmail);
 router.get('/reset-password', verifyResetPasswordToken);
 

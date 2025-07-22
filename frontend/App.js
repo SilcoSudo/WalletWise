@@ -7,15 +7,17 @@ import { useTransactionsContext, TransactionsProvider } from './src/hooks/useTra
 import { useTheme } from './src/hooks/useTheme';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
-import ModalAddTransaction from './src/components/ModalAddTransaction';
 import './src/utils/i18n'; // Import the i18n configuration
 import Toast from 'react-native-toast-message';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './src/utils/i18n';
 
 // ===================== REFACTORED APP =====================
 // Entry point với AuthNavigator và AppNavigator tách biệt, global modal
 
 export default function App() {
   return (
+    <I18nextProvider i18n={i18n}>
     <AuthProvider>
       <TransactionsProvider>
         <SafeAreaProvider>
@@ -23,6 +25,7 @@ export default function App() {
         </SafeAreaProvider>
       </TransactionsProvider>
     </AuthProvider>
+    </I18nextProvider>
   );
 }
 
@@ -66,6 +69,7 @@ function MainApp() {
         <AuthNavigator 
           isDarkMode={isDarkMode}
           onAuthSuccess={handleAuthSuccess}
+          onToggleDarkMode={toggleTheme}
         />
       </>
     );
@@ -82,16 +86,9 @@ function MainApp() {
         <AppNavigator 
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleTheme}
-          onAddTransaction={handleOpenAddTransaction}
         />
       </NavigationContainer>
-      <ModalAddTransaction
-        visible={showAddModal}
-        onClose={handleCloseAddTransaction}
-        onAddTransaction={handleAddTransaction}
-        isDarkMode={isDarkMode}
-      />
-      {/* Global Add Transaction Modal */}
+   
       <Toast />
     </>
   );

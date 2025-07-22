@@ -18,9 +18,12 @@ import api from '../utils/api';
 import { useCategories } from '../hooks/useCategories';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
 
 
 const PERIODS = ['Tuần', 'Tháng', 'Quý', 'Năm'];
+// Thay STATUS_FILTER thành dạng object để dịch:
 const STATUS_FILTER = ['All', 'Active', 'Expired'];
 
 /**
@@ -32,14 +35,15 @@ const STATUS_FILTER = ['All', 'Active', 'Expired'];
  */
 function CategorySelector({ value, onChange, isDarkMode }) {
   const { categories, loading: loadingCategories } = useCategories();
+  const { t } = useTranslation();
   // Gradient màu giống header
   const gradientColors = isDarkMode ? ["#d7d2cc", "#304352"] : ["#a8edea", "#fed6e3"];
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-3">
       {loadingCategories ? (
-        <Text className={isDarkMode ? 'text-white' : 'text-gray-800'}>Đang tải danh mục...</Text>
+        <Text className={isDarkMode ? 'text-white' : 'text-gray-800'}>{t('budget.loadingCategories')}</Text>
       ) : categories.length === 0 ? (
-        <Text className={isDarkMode ? 'text-white' : 'text-gray-800'}>Không có danh mục nào</Text>
+        <Text className={isDarkMode ? 'text-white' : 'text-gray-800'}>{t('budget.noCategories')}</Text>
       ) : (
         categories.map(item => {
           const selected = (item._id || item.id) === value;
@@ -50,18 +54,23 @@ function CategorySelector({ value, onChange, isDarkMode }) {
               className={`items-center mr-3 px-2 py-2 rounded-xl border ${selected ? 'border-blue-500' : isDarkMode ? 'border-gray-600' : 'border-gray-200'} bg-transparent`}
               style={{ minWidth: 80, maxWidth: 100 }}
             >
-              <LinearGradient
-                colors={gradientColors}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 6,
+                  backgroundColor: item.bgColor || item.backgroundColor || '#f3f4f6',
+                }}
               >
                 <FontAwesome5
                   name={item.icon}
                   size={20}
                   color={selected ? '#2563eb' : isDarkMode ? '#fff' : '#555'}
                 />
-              </LinearGradient>
+              </View>
               <Text className={`text-xs text-center font-medium ${selected ? 'text-blue-600' : isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}
                 numberOfLines={2}
               >
@@ -87,6 +96,7 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const { categories, loading: loadingCategories } = useCategories();
   const gradientColors = isDarkMode ? ["#d7d2cc", "#304352"] : ["#a8edea", "#fed6e3"];
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     id: null,
     category: '', // Sẽ set sau khi categories load xong
@@ -102,8 +112,10 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
   }, [categories]);
 
   useEffect(() => {
-    fetchBudgets();
-  }, [filter]);
+    if (!loadingCategories) {
+      fetchBudgets();
+    }
+  }, [filter, loadingCategories]);
 
   /**
    * Lấy danh sách ngân sách từ backend, đồng thời tính tổng/đã sử dụng/còn lại.
@@ -138,6 +150,7 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
    * @param {object} item - Ngân sách cần chỉnh sửa
    */
   const openEdit = item => {
+    console.log('Edit budget:', item);
     setForm({
       id: item._id || item.id,
       category: item.category, // Lưu id category
@@ -153,16 +166,20 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
    * Gửi dữ liệu lên backend, sau đó reload danh sách ngân sách.
    */
   const onSave = async () => {
-    if (!form.category || !form.limit) {
-      return Alert.alert('Thông báo', 'Chọn danh mục và nhập giới hạn');
+    if (!form.category || !form.limit || isNaN(Number(form.limit)) || Number(form.limit) <= 0) {
+      return Alert.alert('Thông báo', 'Vui lòng chọn danh mục và nhập hạn mức hợp lệ');
     }
     try {
+      const startDate = new Date();
+      const endDate = getEndDate(startDate, form.period);
       if (form.id) {
         await api.budgets.update(form.id, {
           category: form.category,
           limit: Number(form.limit),
           period: form.period,
           alert: form.alert,
+          startDate,
+          endDate,
         });
       } else {
         await api.budgets.create({
@@ -170,6 +187,8 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
           limit: Number(form.limit),
           period: form.period,
           alert: form.alert,
+          startDate,
+          endDate,
         });
       }
       setModalVisible(false);
@@ -221,9 +240,18 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
     const progressColor = percent > 100 ? '#ef4444' : 'url(#budget-gradient)';
     // Lấy thông tin category động
     const cat = categories.find(c => (c._id || c.id) === item.category);
+    let periodText = '';
+    if (item.startDate && item.endDate) {
+      periodText = `Hiệu lực: ${format(new Date(item.startDate), 'dd/MM/yyyy')} - ${format(new Date(item.endDate), 'dd/MM/yyyy')}`;
+    }
     return (
-      <TouchableOpacity style={styles.card} onPress={() => openEdit(item)}>
+      <TouchableOpacity style={[styles.card]} onPress={() => openEdit(item)} activeOpacity={0.7}>
         <View style={styles.cardHeader}>
+          {cat && (
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: cat.bgColor || cat.backgroundColor || '#f3f4f6', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+              <Icon name={cat.icon} size={22} color={cat.color || cat.iconColor || '#374151'} />
+            </View>
+          )}
           <Text style={styles.cardTitle}>{cat ? cat.name : item.category}</Text>
           <View style={styles.cardIcons}>
             {percent >= 90 && <MaterialIcons name="warning" size={20} color="#f00" />}
@@ -232,121 +260,105 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
             </TouchableOpacity>
           </View>
         </View>
+        {periodText && (
+          <Text style={{ color: '#888', fontSize: 12, marginBottom: 2 }}>{periodText}</Text>
+        )}
         <View style={[styles.progressBg, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }] }>
           <LinearGradient
-            colors={percent > 100 ? ['#ef4444', '#ef4444'] : gradientColors}
+            colors={getProgressColors(percent)}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            end={{ x: 1, y: 0 }}
             style={[styles.progressFill, { width: `${Math.min(percent, 100)}%` }]}
           />
         </View>
-        <Text style={[styles.cardSubtitle, { color: percent > 100 ? '#ef4444' : isDarkMode ? '#a5b4fc' : '#2563eb' }]}>{percent}% đã sử dụng</Text>
+        <Text style={[styles.cardSubtitle, { color: percent > 100 ? '#ef4444' : isDarkMode ? '#a5b4fc' : '#2563eb' }]}>{t('budget.percentUsed', { percent })}</Text>
       </TouchableOpacity>
     );
   };
 
+  const getProgressColors = (percent) => {
+    if (percent > 90) return ['#ef4444', '#ef4444']; // đỏ
+    if (percent > 50) return ['#facc15', '#ef4444']; // vàng sang đỏ
+    return ['#22c55e', '#facc15']; // xanh sang vàng
+  };
+
+  // Thêm hàm tính ngày kết thúc dựa vào period
+  function getEndDate(startDate, period) {
+    const d = new Date(startDate);
+    switch (period) {
+      case 'Tuần': d.setDate(d.getDate() + 6); break;
+      case 'Tháng': d.setMonth(d.getMonth() + 1); d.setDate(d.getDate() - 1); break;
+      case 'Quý': d.setMonth(d.getMonth() + 3); d.setDate(d.getDate() - 1); break;
+      case 'Năm': d.setFullYear(d.getFullYear() + 1); d.setDate(d.getDate() - 1); break;
+      default: break;
+    }
+    return d;
+  }
+
+  if (loadingCategories) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Đang tải danh mục...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#18181b' : '#f9fafb' }]} contentContainerStyle={{ paddingBottom: 32 }}>
-      {/* Bỏ nút quay lại */}
-      {/* Đưa nút cộng lên cùng hàng với tiêu đề, căn phải */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Text style={[styles.header, { color: isDarkMode ? '#fff' : '#18181b', marginBottom: 0 }]}>Quản lý ngân sách</Text>
-        <TouchableOpacity style={[styles.addBtn, { position: 'relative', right: 0, bottom: 0, marginLeft: 12 }]} onPress={() => setModalVisible(true)}>
-          <LinearGradient
-            colors={gradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ ...StyleSheet.absoluteFillObject, borderRadius: 28 }}
-          />
-          <Icon name="plus" size={28} color="#fff" style={{ zIndex: 1 }} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Summary */}
-      {/* Mapping các ô tổng thành 3 dòng dọc, font lớn hơn */}
-      <View style={{ flexDirection: 'column', alignItems: 'center', marginBottom: 16, width: '100%' }}>
-        {['Tổng', 'Đã sử dụng', 'Còn lại'].map((label, i) => {
-          const val = [summary.total, summary.used, summary.remaining][i];
-          return (
-            <View key={i} style={[styles.summaryCard, { backgroundColor: isDarkMode ? '#23272f' : '#fff', shadowColor: isDarkMode ? '#000' : '#000', minWidth: 220, alignItems: 'center', justifyContent: 'center', paddingVertical: 24, paddingHorizontal: 6, marginBottom: 16 }] }>
-              <Text style={{ color: isDarkMode ? '#2563eb' : '#2563eb', fontWeight: 'bold', fontSize: 12, marginBottom: 8, textAlign: 'center', flexWrap: 'nowrap' }}>{label}</Text>
-              <Text style={{ color: isDarkMode ? '#fff' : '#18181b', fontWeight: 'bold', fontSize: 16, textAlign: 'center', flexWrap: 'nowrap' }}>{val}₫</Text>
-            </View>
-          );
-        })}
-      </View>
-
-      {/* Filter */}
-      <View style={styles.filterContainer}>
-        {STATUS_FILTER.map(s => {
-          const selected = filter === s;
-          return (
-            <TouchableOpacity
-              key={s}
-              style={[styles.filterBtn, selected && styles.filterBtnActive, { overflow: 'hidden' }]}
-              onPress={() => setFilter(s)}
-            >
-              {selected ? (
-                <LinearGradient
-                  colors={gradientColors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ ...StyleSheet.absoluteFillObject, borderRadius: 20, opacity: 0.9 }}
-                />
-              ) : null}
-              <Text style={{ color: selected ? '#fff' : isDarkMode ? '#a5b4fc' : '#2563eb', fontWeight: selected ? 'bold' : 'normal', zIndex: 1 }}>{s}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* Budget List */}
+    <>
       <FlatList
         data={budgets}
         keyExtractor={item => item._id || item.id}
-        renderItem={({ item }) => {
-          const percent = item.limit ? Math.round(item.spent / item.limit * 100) : 0;
-          const cat = categories.find(c => (c._id || c.id) === item.category);
-          return (
-            <View style={[styles.card, { backgroundColor: isDarkMode ? '#23272f' : '#fff', shadowColor: isDarkMode ? '#000' : '#000' }] }>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  {/* Hiển thị icon và màu category */}
-                  {cat && (
-                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: cat.bgColor || '#e5e7eb', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-                      <Icon name={cat.icon} size={22} color={cat.color || '#2563eb'} />
-                    </View>
-                  )}
-                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: isDarkMode ? '#fff' : '#18181b' }}>{cat ? cat.name : item.category}</Text>
-                </View>
-                <TouchableOpacity onPress={() => onDelete(item._id || item.id)} style={styles.deleteBtn}>
-                  <MaterialIcons name="delete" size={22} color="#b91c1c" />
-                </TouchableOpacity>
-              </View>
-              <View style={[styles.progressBg, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }] }>
-                <LinearGradient
-                  colors={percent > 100 ? ['#ef4444', '#ef4444'] : gradientColors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={[styles.progressFill, { width: `${Math.min(percent, 100)}%` }]}
-                />
-              </View>
-              <Text style={[styles.cardSubtitle, { color: percent > 100 ? '#ef4444' : isDarkMode ? '#a5b4fc' : '#2563eb', fontSize: 16, marginTop: 8 }]}>{percent}% đã sử dụng</Text>
+        renderItem={renderBudget}
+        ListHeaderComponent={
+          <>
+            {/* Header + Add button */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <Text style={[styles.header, { color: isDarkMode ? '#fff' : '#18181b', marginBottom: 0 }]}>{t('budget.manageBudget')}</Text>
+              <TouchableOpacity style={{ marginLeft: 12 }} onPress={() => setModalVisible(true)}>
+                <Icon name="plus" size={28} color="#2563eb" style={{ marginLeft: 8 }} />
+              </TouchableOpacity>
             </View>
-          );
-        }}
-        ListEmptyComponent={<Text style={styles.empty}>Chưa có ngân sách</Text>}
-        contentContainerStyle={{ paddingBottom: 32 }}
+            {/* Summary */}
+            <View style={{ flexDirection: 'column', alignItems: 'left', marginBottom: 16, width: '100%' }}>
+              {['Tổng', 'Đã sử dụng', 'Còn lại'].map((label, i) => {
+                const val = [summary.total, summary.used, summary.remaining][i];
+                return (
+                  <View key={i} style={[styles.summaryCard, { backgroundColor: isDarkMode ? '#23272f' : '#fff', shadowColor: isDarkMode ? '#000' : '#000',
+                    minWidth: 220, alignItems: 'flex-start',
+                    justifyContent: 'flex-start', paddingVertical: 4, paddingHorizontal: 6,
+                     marginBottom: 16, paddingLeft: 15, paddingRight: 12 }] }>
+                    <Text style={{ color: isDarkMode ? '#2563eb' : '#2563eb', fontWeight: 'bold', fontSize: 12, marginBottom: 8, textAlign: 'left', flexWrap: 'nowrap' }}>{label}</Text>
+                    <Text style={{ color: isDarkMode ? '#fff' : '#18181b', fontWeight: 'bold', fontSize: 16, textAlign: 'left', flexWrap: 'nowrap' }}>{val}₫</Text>
+                  </View>
+                );
+              })}
+            </View>
+            {/* Filter */}
+            <View style={styles.filterContainer}>
+              {STATUS_FILTER.map(key => {
+                const selected = filter === key;
+                const label = t(`budget.${key.toLowerCase()}`);
+                return (
+                  <TouchableOpacity
+                    key={key}
+                    style={[styles.filterBtn, selected && styles.filterBtnActive, { overflow: 'hidden' }]}
+                    onPress={() => setFilter(key)}
+                  >
+                    <Text style={{ color: selected ? '#fff' : isDarkMode ? '#a5b4fc' : '#2563eb', fontWeight: selected ? 'bold' : 'normal', zIndex: 1 }}>{label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </>
+        }
+        ListEmptyComponent={<Text style={styles.empty}>{t('budget.noBudget')}</Text>}
+        contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
       />
-
-      {/* Add Button */}
-      {/* This button is now moved to the header */}
-
       {/* Create / Edit Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className={`w-11/12 rounded-lg p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
-            <Text className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{form.id ? 'Chỉnh sửa ngân sách' : 'Tạo ngân sách mới'}</Text>
+            <Text className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{form.id ? t('budget.editBudget') : t('budget.createBudget')}</Text>
             <CategorySelector
               value={form.category}
               onChange={key => setForm(f => ({ ...f, category: key }))}
@@ -354,7 +366,7 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
             />
             <TextInput
               className={`border rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-300 bg-white text-gray-800'}`}
-              placeholder="Giới hạn (₫)"
+              placeholder={t('budget.limit')}
               placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
               keyboardType="numeric"
               value={form.limit}
@@ -389,7 +401,7 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
               })}
             </View>
             <View className="flex-row items-center justify-between mb-6">
-              <Text className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>Cảnh báo gần hết</Text>
+              <Text className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{t('budget.alertNearExpired')}</Text>
               <TouchableOpacity onPress={() => setForm(f => ({ ...f, alert: !f.alert }))}>
                 <MaterialIcons
                   name={form.alert ? 'notifications-active' : 'notifications-off'}
@@ -410,7 +422,7 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
                   end={{ x: 1, y: 1 }}
                   style={{ ...StyleSheet.absoluteFillObject, borderRadius: 8, opacity: 0.15 }}
                 />
-                <Text className="text-blue-600 font-semibold" style={{ zIndex: 1 }}>HUỶ</Text>
+                <Text className="text-blue-600 font-semibold" style={{ zIndex: 1 }}>{t('budget.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 py-3 rounded-lg ml-2 items-center overflow-hidden"
@@ -422,13 +434,13 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
                   end={{ x: 1, y: 1 }}
                   style={{ ...StyleSheet.absoluteFillObject, borderRadius: 8 }}
                 />
-                <Text className="text-white font-semibold" style={{ zIndex: 1 }}>LƯU</Text>
+                <Text className="text-white font-semibold" style={{ zIndex: 1 }}>{t('budget.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </>
   );
 }
 

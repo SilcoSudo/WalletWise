@@ -124,6 +124,18 @@ export const AuthProvider = ({ children }) => {
 
   // Logout
   const logout = useCallback(async () => {
+    try {
+      // Gọi API logout để đồng bộ với backend
+      if (authAPI.logout) {
+        await authAPI.logout();
+      } else {
+        // fallback nếu chưa có
+        await fetch('http://192.168.1.15:5000/api/auth/logout', { method: 'POST' });
+      }
+    } catch (err) {
+      // Không cần xử lý lỗi logout backend, vẫn tiếp tục xoá local
+      console.error('Logout API error:', err);
+    }
     global.authToken = null;
     setUser(null);
     setError(null);

@@ -7,12 +7,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../hooks/useTheme";
 import { useTransactionsContext } from "../hooks/useTransactions";
 import { useCategories } from '../hooks/useCategories';
+import { useTranslation } from 'react-i18next';
 
 import { Text, TextInput, TouchableOpacity } from "react-native";
 
 const AddTransactionScreen = ({ onClose }) => {
   const { isDarkMode } = useTheme();
   const { addTransaction } = useTransactionsContext();
+  const { t } = useTranslation();
 
   const [type, setType] = useState("expense");
   const [amount, setAmount] = useState("");
@@ -75,7 +77,7 @@ const AddTransactionScreen = ({ onClose }) => {
             isDarkMode ? "text-white" : "text-gray-900"
           }`}
         >
-          Thêm giao dịch
+          {t('transaction.add')}
         </Text>
 
         
@@ -86,7 +88,7 @@ const AddTransactionScreen = ({ onClose }) => {
                 isDarkMode ? "text-white" : "text-gray-800"
               }`}
             >
-              Loại giao dịch
+              {t('transaction.type')}
             </Text>
             <View className="flex-row space-x-3">
               {["expense", "income"].map((item) => (
@@ -143,7 +145,7 @@ const AddTransactionScreen = ({ onClose }) => {
                 isDarkMode ? "text-white" : "text-gray-800"
               }`}
             >
-              Ngày giao dịch
+              {t('transaction.date')}
             </Text>
             <TouchableOpacity
               onPress={() => setShowDatePicker(true)}
@@ -177,7 +179,7 @@ const AddTransactionScreen = ({ onClose }) => {
                 isDarkMode ? "text-white" : "text-gray-800"
               }`}
             >
-              Số tiền
+              {t('transaction.amount')}
             </Text>
             <View
               className={`flex-row items-center border rounded-lg px-3 py-3 ${
@@ -195,7 +197,7 @@ const AddTransactionScreen = ({ onClose }) => {
               <TextInput
                 value={amount}
                 onChangeText={setAmount}
-                placeholder="Nhập số tiền"
+                placeholder={t('transaction.amountPlaceholder')}
                 placeholderTextColor={isDarkMode ? "#9ca3af" : "#9ca3af"}
                 keyboardType="numeric"
                 className={`flex-1 text-lg ${
@@ -217,7 +219,7 @@ const AddTransactionScreen = ({ onClose }) => {
                 isDarkMode ? "text-white" : "text-gray-800"
               }`}
             >
-              Mô tả
+              {t('transaction.description')}
             </Text>
             <View
               className={`border rounded-lg px-3 py-3 ${
@@ -229,7 +231,7 @@ const AddTransactionScreen = ({ onClose }) => {
               <TextInput
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Nhập mô tả giao dịch"
+                placeholder={t('transaction.descriptionPlaceholder')}
                 placeholderTextColor={isDarkMode ? "#9ca3af" : "#9ca3af"}
                 multiline
                 numberOfLines={3}
@@ -245,7 +247,7 @@ const AddTransactionScreen = ({ onClose }) => {
                 isDarkMode ? "text-white" : "text-gray-800"
               }`}
             >
-              Danh mục
+              {t('transaction.category')}
             </Text>
             <ScrollView
               horizontal
@@ -313,7 +315,7 @@ const AddTransactionScreen = ({ onClose }) => {
               className="rounded-lg py-4 items-center"
             >
               <Text className="text-white text-lg font-semibold">
-                {loading ? "Đang lưu..." : "Lưu giao dịch"}
+                {loading ? "Đang lưu..." : t('common.save')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>

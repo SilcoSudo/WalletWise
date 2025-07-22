@@ -1,4 +1,6 @@
 const Category = require("../models/Category");
+const Transaction = require("../models/Transaction");
+const Budget = require("../models/Budget");
 
 // Controller xử lý các API liên quan đến danh mục chi tiêu/thu nhập
 
@@ -93,8 +95,17 @@ const deleteCategory = async (req, res) => {
       return res.status(403).json({ message: "Category cannot be deleted" });
     }
 
+    // Xóa transaction liên quan
+    const txResult = await Transaction.deleteMany({ userId, categoryId: id });
+    // Xóa budget liên quan
+    const budgetResult = await Budget.deleteMany({ category: id });
+
     await Category.findByIdAndDelete(id);
-    res.json({ message: "Category deleted successfully" });
+    res.json({
+      message: "Category deleted successfully",
+      deletedTransactions: txResult.deletedCount,
+      deletedBudgets: budgetResult.deletedCount
+    });
   } catch (error) {
     console.error("Delete category error:", error);
     res.status(500).json({ message: "Server error" });

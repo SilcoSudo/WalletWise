@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAuth } from '../hooks/useAuth';
+import { LinearGradient } from 'expo-linear-gradient';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
-const SecurityScreen = ({ navigation }) => {
+const SecurityScreen = ({ isDarkMode = false, navigation }) => {
   const { updatePassword, deleteUser } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -58,49 +63,59 @@ const SecurityScreen = ({ navigation }) => {
   };
 
   return (
-    <View className="flex-1 justify-center items-center px-6 bg-white">
-      <Text className="text-2xl font-bold mb-4">Đổi mật khẩu</Text>
-      <TextInput
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Mật khẩu hiện tại"
-        value={currentPassword}
-        onChangeText={setCurrentPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      <TextInput
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Mật khẩu mới"
-        value={newPassword}
-        onChangeText={setNewPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      <TextInput
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Xác nhận mật khẩu mới"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      <TouchableOpacity
-        className="w-full bg-blue-600 rounded-lg py-3 items-center mb-3"
-        onPress={handleChangePassword}
-        disabled={loading}
-      >
-        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold">Đổi mật khẩu</Text>}
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={handleDeleteAccount}
-        className="w-full bg-red-500 rounded-lg py-3 items-center mb-3"
-      >
-        <Text className="text-white font-semibold">Xóa tài khoản</Text>
-      </TouchableOpacity>
-      <TouchableOpacity className="mt-6" onPress={() => navigation?.goBack?.()}>
-        <Text className="text-blue-600">Quay lại</Text>
-      </TouchableOpacity>
-    </View>
+    <ScrollView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      <View className="flex-1 justify-center px-6" style={{ paddingTop: 50 }}>
+        <LanguageSwitcher isDarkMode={isDarkMode} />
+        {/* Header */}
+        <View className="items-center mb-8">
+          <LinearGradient colors={['#667eea', '#764ba2']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} className="w-20 h-20 rounded-full items-center justify-center mb-4">
+            <Icon name="shield-alt" size={32} color="white" />
+          </LinearGradient>
+          <Text className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{t('security.title')}</Text>
+        </View>
+        {/* Change Password Form */}
+        <View className="space-y-4 mb-6">
+          {/* Current Password */}
+          <View>
+            <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>{t('security.currentPassword')}</Text>
+            <View className={`flex-row items-center border rounded-lg px-3 py-3 ${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'}`}>
+              <Icon name="lock" size={16} color={isDarkMode ? '#9ca3af' : '#6b7280'} className="mr-3" />
+              <TextInput value={currentPassword} onChangeText={setCurrentPassword} placeholder={t('security.currentPassword')} placeholderTextColor={isDarkMode ? '#9ca3af' : '#9ca3af'} className={`flex-1 text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+            </View>
+          </View>
+          {/* New Password */}
+          <View>
+            <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>{t('security.newPassword')}</Text>
+            <View className={`flex-row items-center border rounded-lg px-3 py-3 ${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'}`}>
+              <Icon name="lock" size={16} color={isDarkMode ? '#9ca3af' : '#6b7280'} className="mr-3" />
+              <TextInput value={newPassword} onChangeText={setNewPassword} placeholder={t('security.newPassword')} placeholderTextColor={isDarkMode ? '#9ca3af' : '#9ca3af'} className={`flex-1 text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+            </View>
+          </View>
+          {/* Confirm New Password */}
+          <View>
+            <Text className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>{t('security.confirmNewPassword')}</Text>
+            <View className={`flex-row items-center border rounded-lg px-3 py-3 ${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'}`}>
+              <Icon name="lock" size={16} color={isDarkMode ? '#9ca3af' : '#6b7280'} className="mr-3" />
+              <TextInput value={confirmPassword} onChangeText={setConfirmPassword} placeholder={t('security.confirmNewPassword')} placeholderTextColor={isDarkMode ? '#9ca3af' : '#9ca3af'} className={`flex-1 text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+            </View>
+          </View>
+        </View>
+        {/* Change Password Button */}
+        <TouchableOpacity onPress={handleChangePassword} className="bg-blue-600 rounded-lg py-4 items-center mb-3">
+          <Text className="text-white text-lg font-semibold">{t('security.changePassword')}</Text>
+        </TouchableOpacity>
+        {/* Delete Account Button */}
+        <TouchableOpacity onPress={handleDeleteAccount} className="mb-4">
+          <LinearGradient colors={['#ef4444', '#b91c1c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} className="rounded-lg py-4 items-center">
+            <Text className="text-white text-lg font-semibold">{t('security.deleteAccount')}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        {/* Back Link */}
+        <TouchableOpacity className="mt-6" onPress={() => navigation?.goBack?.()}>
+          <Text className="text-blue-600">{t('security.back')}</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 

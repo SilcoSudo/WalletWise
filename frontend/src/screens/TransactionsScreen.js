@@ -10,17 +10,19 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { formatCurrency } from "../utils/format";
 import TransactionCard from "../components/TransactionCard";
 import { useTransactionsContext } from "../hooks/useTransactions";
+import { useTranslation } from 'react-i18next';
 
 const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchText, setSearchText] = useState("");
 
   const { transactions, loading, error } = useTransactionsContext();
+  const { t } = useTranslation();
 
   const tabs = [
-    { key: "all", label: "Tất cả" },
-    { key: "expense", label: "Chi tiêu" },
-    { key: "income", label: "Thu nhập" },
+    { key: "all", label: t('transactions.all') },
+    { key: "expense", label: t('transactions.expense') },
+    { key: "income", label: t('transactions.income') },
   ];
 
   const filteredTransactions = transactions.filter((transaction) => {
@@ -55,7 +57,7 @@ const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
         }`}
       >
         <Text className={`${isDarkMode ? "text-white" : "text-gray-600"}`}>
-          Đang tải dữ liệu...
+          {t('transactions.loadingData')}
         </Text>
       </View>
     );
@@ -74,7 +76,7 @@ const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
             isDarkMode ? "text-white" : "text-gray-800"
           }`}
         >
-          Lỗi tải dữ liệu
+          {t('transactions.errorLoadingData')}
         </Text>
         <Text
           className={`text-sm text-center mt-2 ${
@@ -99,7 +101,7 @@ const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
           <TextInput
             value={searchText}
             onChangeText={setSearchText}
-            placeholder="Tìm kiếm giao dịch..."
+            placeholder={t('transactions.searchPlaceholder')}
             className={`p-3 pl-10 ${
               isDarkMode ? "text-white" : "text-gray-800"
             }`}
@@ -163,7 +165,7 @@ const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
                     isDarkMode ? "text-gray-400" : "text-gray-500"
                   }`}
                 >
-                  Thu nhập
+                  {t('transactions.income')}
                 </Text>
                 <Text
                   className={`font-medium ${
@@ -191,7 +193,7 @@ const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
                     isDarkMode ? "text-gray-400" : "text-gray-500"
                   }`}
                 >
-                  Chi tiêu
+                  {t('transactions.expense')}
                 </Text>
                 <Text
                   className={`font-medium ${
@@ -233,14 +235,14 @@ const TransactionsScreen = ({ isDarkMode = false, onEditTransaction }) => {
                 isDarkMode ? "text-gray-400" : "text-gray-500"
               }`}
             >
-              Không tìm thấy giao dịch
+              {t('transactions.noTransactionsFound')}
             </Text>
             <Text
               className={`text-sm mt-2 ${
                 isDarkMode ? "text-gray-500" : "text-gray-400"
               }`}
             >
-              Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+              {t('transactions.tryChangingFiltersOrSearch')}
             </Text>
           </View>
         )}

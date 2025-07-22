@@ -18,6 +18,7 @@ import {
   updateReport,
   deleteReport,
 } from "../utils/api";
+import { useTranslation } from 'react-i18next';
 
 const ReportsScreen = () => {
   const [reports, setReports] = useState([]);
@@ -40,6 +41,8 @@ const ReportsScreen = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
 
+  const { t } = useTranslation();
+
   // Fetch all saved reports
   const fetchReports = async () => {
     setLoading(true);
@@ -47,7 +50,7 @@ const ReportsScreen = () => {
       const data = await getReports();
       setReports(data);
     } catch {
-      setError("Không lấy được báo cáo");
+      setError(t('reports.error'));
     }
     setLoading(false);
   };
@@ -59,19 +62,19 @@ const ReportsScreen = () => {
 
   // Delete a report
   const handleDelete = (id) => {
-    Alert.alert("Xác nhận", "Bạn có chắc muốn xoá báo cáo này?", [
-      { text: "Huỷ" },
+    Alert.alert(t('common.confirm'), t('reports.deleteConfirm'), [
+      { text: t('common.cancel') },
       {
-        text: "Xoá",
+        text: t('common.delete'),
         style: "destructive",
         onPress: async () => {
           setActionLoading(true);
           try {
             await deleteReport(id);
-            setSuccess("Đã xoá báo cáo!");
+            setSuccess(t('reports.deleteSuccess'));
             fetchReports();
           } catch {
-            setError("Lỗi khi xoá báo cáo");
+            setError(t('reports.deleteError'));
           }
           setActionLoading(false);
         },
@@ -105,11 +108,11 @@ const ReportsScreen = () => {
   const handleSave = async () => {
     // Validation
     if (!form.title.trim()) {
-      setError("Tiêu đề không được để trống");
+      setError(t('reports.titleEmpty'));
       return;
     }
     if (form.startDate > form.endDate) {
-      setError("Ngày bắt đầu phải không sau ngày kết thúc");
+      setError(t('reports.startDateAfterEnd'));
       return;
     }
 
@@ -122,15 +125,15 @@ const ReportsScreen = () => {
       };
       if (editMode) {
         await updateReport(editingId, payload);
-        setSuccess("Đã cập nhật báo cáo!");
+        setSuccess(t('reports.updateSuccess'));
       } else {
         await createReport(payload);
-        setSuccess("Đã tạo báo cáo!");
+        setSuccess(t('reports.createSuccess'));
       }
       setModalVisible(false);
       fetchReports();
     } catch {
-      setError("Lỗi khi lưu báo cáo");
+      setError(t('reports.saveError'));
     }
     setActionLoading(false);
   };
@@ -147,8 +150,7 @@ const ReportsScreen = () => {
       <TouchableOpacity onPress={() => handleShowDetail(item)}>
         <Text style={{ fontSize: 16, fontWeight: "bold" }}>{item.title}</Text>
         <Text style={{ color: "#666", marginTop: 4 }}>
-          Từ {new Date(item.startDate).toLocaleDateString("vi-VN")} – Đến{" "}
-          {new Date(item.endDate).toLocaleDateString("vi-VN")}
+          {t('reports.from')} {new Date(item.startDate).toLocaleDateString("vi-VN")} {t('reports.to')} {new Date(item.endDate).toLocaleDateString("vi-VN")}
         </Text>
       </TouchableOpacity>
       <View style={{ flexDirection: "row", marginTop: 8 }}>
@@ -156,10 +158,10 @@ const ReportsScreen = () => {
           onPress={() => handleEditInit(item)}
           style={{ marginRight: 24 }}
         >
-          <Text style={{ color: "#2563eb", fontWeight: "500" }}>Sửa</Text>
+          <Text style={{ color: "#2563eb", fontWeight: "500" }}>{t('reports.edit')}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleDelete(item._id)}>
-          <Text style={{ color: "#ef4444", fontWeight: "500" }}>Xóa</Text>
+          <Text style={{ color: "#ef4444", fontWeight: "500" }}>{t('reports.delete')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -169,7 +171,7 @@ const ReportsScreen = () => {
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Header */}
       <Text style={{ fontSize: 22, fontWeight: "bold", margin: 16 }}>
-        Quản lý báo cáo
+        {t('reports.manage')}
       </Text>
 
       {/* Add button */}
@@ -186,7 +188,7 @@ const ReportsScreen = () => {
         }}
       >
         <Text style={{ color: "#fff", fontWeight: "bold" }}>
-          + Thêm báo cáo
+          {t('reports.add')}
         </Text>
       </TouchableOpacity>
 
@@ -219,11 +221,11 @@ const ReportsScreen = () => {
             <Text
               style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}
             >
-              {editMode ? "Sửa báo cáo" : "Thêm báo cáo"}
+              {editMode ? t('reports.editReport') : t('reports.addReport')}
             </Text>
             {/* Title input */}
             <TextInput
-              placeholder="Tiêu đề"
+              placeholder={t('reports.title')}
               value={form.title}
               onChangeText={(text) => setForm({ ...form, title: text })}
               style={{
@@ -242,7 +244,7 @@ const ReportsScreen = () => {
               onPress={() => setShowStart(true)}
               style={{ marginTop: 16 }}
             >
-              <Text>Từ ngày: {form.startDate.toLocaleDateString("vi-VN")}</Text>
+              <Text>{t('reports.startDate')}: {form.startDate.toLocaleDateString("vi-VN")}</Text>
             </TouchableOpacity>
             {showStart && (
               <DateTimePicker
@@ -260,7 +262,7 @@ const ReportsScreen = () => {
               onPress={() => setShowEnd(true)}
               style={{ marginTop: 12 }}
             >
-              <Text>Đến ngày: {form.endDate.toLocaleDateString("vi-VN")}</Text>
+              <Text>{t('reports.endDate')}: {form.endDate.toLocaleDateString("vi-VN")}</Text>
             </TouchableOpacity>
             {showEnd && (
               <DateTimePicker
@@ -286,7 +288,7 @@ const ReportsScreen = () => {
                 onPress={() => setModalVisible(false)}
                 style={{ padding: 10 }}
               >
-                <Text style={{ color: "#444", fontWeight: "500" }}>Huỷ</Text>
+                <Text style={{ color: "#444", fontWeight: "500" }}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSave}
@@ -303,7 +305,7 @@ const ReportsScreen = () => {
                 }}
               >
                 <Text style={{ color: "#fff", fontWeight: "500" }}>
-                  {editMode ? "Lưu" : "Tạo"}
+                  {t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -343,15 +345,12 @@ const ReportsScreen = () => {
                     marginBottom: 12,
                   }}
                 >
-                  Từ{" "}
-                  {new Date(selectedReport.startDate).toLocaleDateString(
+                  {t('reports.from')} {new Date(selectedReport.startDate).toLocaleDateString(
                     "vi-VN"
-                  )}{" "}
-                  – Đến{" "}
-                  {new Date(selectedReport.endDate).toLocaleDateString("vi-VN")}
+                  )} {t('reports.to')} {new Date(selectedReport.endDate).toLocaleDateString("vi-VN")}
                 </Text>
                 <Text style={{ fontWeight: "500", marginBottom: 6 }}>
-                  Các giao dịch:
+                  {t('reports.transactions')}:
                 </Text>
 
                 {selectedReport.details?.length > 0 ? (
@@ -388,7 +387,7 @@ const ReportsScreen = () => {
                                 marginBottom: 2,
                               }}
                             >
-                              Ngày: {dateStr}
+                              {t('reports.date')}: {dateStr}
                             </Text>
                           )}
                           {/* Danh mục: ± số tiền */}
@@ -403,7 +402,7 @@ const ReportsScreen = () => {
                                 marginTop: 2,
                               }}
                             >
-                              Ghi chú: {item.note}
+                              {t('reports.note')}: {item.note}
                             </Text>
                           )}
                         </View>
@@ -411,7 +410,7 @@ const ReportsScreen = () => {
                     }}
                   />
                 ) : (
-                  <Text style={{ color: "#999" }}>Không có giao dịch nào</Text>
+                  <Text style={{ color: "#999" }}>{t('reports.noTransactions')}</Text>
                 )}
 
                 {/* Action buttons */}
@@ -430,7 +429,7 @@ const ReportsScreen = () => {
                     style={{ marginRight: 24 }}
                   >
                     <Text style={{ color: "#2563eb", fontWeight: "500" }}>
-                      Sửa
+                      {t('reports.edit')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -440,7 +439,7 @@ const ReportsScreen = () => {
                     }}
                   >
                     <Text style={{ color: "#ef4444", fontWeight: "500" }}>
-                      Xóa
+                      {t('reports.delete')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -448,7 +447,7 @@ const ReportsScreen = () => {
                     style={{ marginLeft: 24 }}
                   >
                     <Text style={{ color: "#444", fontWeight: "500" }}>
-                      Đóng
+                      {t('common.close')}
                     </Text>
                   </TouchableOpacity>
                 </View>

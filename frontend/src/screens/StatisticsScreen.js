@@ -6,6 +6,7 @@ import { formatCurrency, formatCurrencyShort } from '../utils/format';
 import { useCategories } from '../hooks/useCategories';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, format } from 'date-fns';
 import { useTransactionsContext } from '../hooks/useTransactions';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -15,20 +16,21 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
   // Lấy dữ liệu giao dịch, thống kê, trạng thái loading, lỗi từ context
   const { transactions, stats, loading, error } = useTransactionsContext();
   const { categories, loading: loadingCategories } = useCategories();
+  const { t } = useTranslation();
 
   // Danh sách các tab thống kê
   const statsTabs = [
-    { key: 'weekly', label: 'Tuần này' },
-    { key: 'monthly', label: 'Tháng này' },
-    { key: 'yearly', label: 'Năm nay' },
+    { key: 'weekly', label: t('statistics.weekly') },
+    { key: 'monthly', label: t('statistics.monthly') },
+    { key: 'yearly', label: t('statistics.yearly') },
   ];
 
   // Hàm lấy tên hiển thị cho tab
   const getTabDisplayName = (tab) => {
     switch (tab) {
-      case 'weekly': return 'Tuần này';
-      case 'monthly': return 'Tháng này';
-      case 'yearly': return 'Năm nay';
+      case 'weekly': return t('statistics.weekly');
+      case 'monthly': return t('statistics.monthly');
+      case 'yearly': return t('statistics.yearly');
       default: return tab;
     }
   };
@@ -137,7 +139,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
     return (
       <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}> 
         <ActivityIndicator size="large" color={isDarkMode ? '#fff' : '#2563eb'} />
-        <Text className={`${isDarkMode ? 'text-white' : 'text-gray-600'} mt-4`}>Đang tải dữ liệu...</Text>
+        <Text className={`${isDarkMode ? 'text-white' : 'text-gray-600'} mt-4`}>{t('statistics.loading')}</Text>
       </View>
     );
   }
@@ -147,7 +149,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
       <View className={`flex-1 justify-center items-center p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <Icon name="exclamation-triangle" size={48} color="#ef4444" />
         <Text className={`text-lg font-semibold mt-4 text-center ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-          Lỗi tải dữ liệu
+          {t('error.loadFailed')}
         </Text>
         <Text className={`text-sm text-center mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
           {error}
@@ -193,19 +195,19 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
         <Text className={`text-base font-semibold mb-2 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
-          Tổng quan {getTabDisplayName(activeStatsTab)}
+          {t('statistics.summary')} {getTabDisplayName(activeStatsTab)}
         </Text>
         <View className="flex-row space-x-3">
           <View className={`flex-1 p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <View className="flex-row items-center justify-between mb-1">
-              <Text className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Thu nhập</Text>
+              <Text className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('statistics.income')}</Text>
               <Icon name="arrow-down" size={14} color="#10b981" />
             </View>
             <Text className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalIncome)}</Text>
           </View>
           <View className={`flex-1 p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <View className="flex-row items-center justify-between mb-1">
-              <Text className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Chi tiêu</Text>
+              <Text className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('statistics.expense')}</Text>
               <Icon name="arrow-up" size={14} color="#ef4444" />
             </View>
             <Text className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(totalExpense)}</Text>
@@ -218,7 +220,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
         <Text className={`text-base font-semibold mb-2 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
-          Chi tiêu theo danh mục
+          {t('statistics.expenseByCategory')}
         </Text>
         <View className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           {pieChartData.length > 0 ? (
@@ -259,7 +261,7 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
               <Text className={`text-base font-medium mt-3 ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
-                Không có dữ liệu
+                {t('statistics.noData')}
               </Text>
             </View>
           )}
@@ -271,9 +273,9 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
         <Text className={`text-base font-semibold mb-2 ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`}>
-          {activeStatsTab === 'weekly' && 'Chi tiêu theo ngày trong tuần'}
-          {activeStatsTab === 'monthly' && 'Chi tiêu theo ngày'}
-          {activeStatsTab === 'yearly' && 'Chi tiêu theo tháng'}
+          {activeStatsTab === 'weekly' && t('statistics.expenseByDayInWeek')}
+          {activeStatsTab === 'monthly' && t('statistics.expenseByDay')}
+          {activeStatsTab === 'yearly' && t('statistics.expenseByMonth')}
         </Text>
         <View className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           <RNScrollView horizontal showsHorizontalScrollIndicator={false}>

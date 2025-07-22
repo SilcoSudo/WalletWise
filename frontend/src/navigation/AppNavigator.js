@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StatusBar } from 'react-native';
+import { View, StatusBar, Alert } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import { useTransactionsContext } from '../hooks/useTransactions';
 import HomeScreen from '../screens/HomeScreen';
@@ -51,14 +51,32 @@ const AppNavigator = ({ isDarkMode, onToggleDarkMode, onAddTransaction }) => {
   }, [isAuthenticated]);
 
   const handleLogout = async () => {
-    try {
-      console.log("AppNavigator: Logging out...");
+    if (user && user.email === 'guest@example.com') {
+      Alert.alert(
+        'Đăng xuất tài khoản khách?',
+        'Bạn sẽ mất toàn bộ dữ liệu hiện tại nếu đăng xuất. Để lưu lại dữ liệu, hãy đăng ký tài khoản.',
+        [
+          { text: 'Huỷ', style: 'cancel' },
+          { text: 'Đăng xuất', style: 'destructive', onPress: async () => {
+              try {
+                await logout();
+                setCurrentScreen("home");
+                setSelectedTransaction(null);
+              } catch (error) {
+                console.error("Logout error:", error);
+              }
+            }
+          }
+        ]
+      );
+    } else {
+      try {
       await logout();
-      console.log("AppNavigator: Logout successful");
       setCurrentScreen("home");
       setSelectedTransaction(null);
     } catch (error) {
       console.error("Logout error:", error);
+      }
     }
   };
 

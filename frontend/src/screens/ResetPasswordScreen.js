@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import * as Linking from 'expo-linking';
 import { authAPI } from '../utils/api';
+import { useTranslation } from 'react-i18next';
 
 const ResetPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ const ResetPasswordScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+  const { t } = useTranslation();
 
   // Tự động lấy token/email từ URL nếu có
   useEffect(() => {
@@ -29,11 +31,11 @@ const ResetPasswordScreen = ({ navigation }) => {
 
   const handleResetPassword = async () => {
     if (!email || !token || !newPassword || !confirmPassword) {
-      setError('Vui lòng nhập đầy đủ thông tin.');
+      setError(t('resetPassword.error.incomplete'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp.');
+      setError(t('resetPassword.error.passwordMismatch'));
       return;
     }
     setLoading(true);
@@ -41,9 +43,9 @@ const ResetPasswordScreen = ({ navigation }) => {
     setSuccess(null);
     try {
       await authAPI.resetPassword({ email, token, newPassword });
-      setSuccess('Đặt lại mật khẩu thành công! Bạn có thể đăng nhập.');
+      setSuccess(t('resetPassword.success'));
     } catch (err) {
-      setError(err.message || 'Đặt lại mật khẩu thất bại.');
+      setError(err.message || t('resetPassword.error.resetFailed'));
     } finally {
       setLoading(false);
     }
@@ -51,13 +53,13 @@ const ResetPasswordScreen = ({ navigation }) => {
 
   return (
     <View className="flex-1 justify-center items-center px-6 bg-white">
-      <Text className="text-2xl font-bold mb-4">Đặt lại mật khẩu</Text>
+      <Text className="text-2xl font-bold mb-4">{t('resetPassword.title')}</Text>
       <Text className="mb-6 text-center text-gray-600">
-        Nhập email, mã xác thực và mật khẩu mới của bạn.
+        {t('resetPassword.description')}
       </Text>
       <TextInput
         className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Email"
+        placeholder={t('resetPassword.emailPlaceholder')}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -65,14 +67,14 @@ const ResetPasswordScreen = ({ navigation }) => {
       />
       <TextInput
         className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Mã xác thực (token)"
+        placeholder={t('resetPassword.tokenPlaceholder')}
         value={token}
         onChangeText={setToken}
         autoCapitalize="none"
       />
       <TextInput
         className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Mật khẩu mới"
+        placeholder={t('resetPassword.newPasswordPlaceholder')}
         value={newPassword}
         onChangeText={setNewPassword}
         secureTextEntry
@@ -80,7 +82,7 @@ const ResetPasswordScreen = ({ navigation }) => {
       />
       <TextInput
         className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Xác nhận mật khẩu mới"
+        placeholder={t('resetPassword.confirmNewPasswordPlaceholder')}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
@@ -91,12 +93,12 @@ const ResetPasswordScreen = ({ navigation }) => {
         onPress={handleResetPassword}
         disabled={loading}
       >
-        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold">Đặt lại mật khẩu</Text>}
+        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold">{t('resetPassword.reset')}</Text>}
       </TouchableOpacity>
       {success && <Text className="text-green-600 mt-2">{success}</Text>}
       {error && <Text className="text-red-600 mt-2">{error}</Text>}
       <TouchableOpacity className="mt-6" onPress={() => navigation?.goBack?.()}>
-        <Text className="text-blue-600">Quay lại đăng nhập</Text>
+        <Text className="text-blue-600">{t('resetPassword.backToLogin')}</Text>
       </TouchableOpacity>
     </View>
   );

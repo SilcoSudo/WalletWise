@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://10.66.165.112:5000/api";
+const API_BASE_URL = "http://192.168.1.12:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -109,6 +109,11 @@ export const authAPI = {
     }
     return data;
   },
+
+  logout: () =>
+    apiRequest("/auth/logout", {
+      method: "POST",
+    }),
 };
 
 // Transactions API

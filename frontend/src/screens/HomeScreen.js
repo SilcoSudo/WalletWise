@@ -16,6 +16,7 @@ import { formatCurrency } from "../utils/format"; // Hàm format số tiền
 import { useCategories } from "../hooks/useCategories"; // Hook lấy danh mục từ API/backend
 import TransactionCard from "../components/TransactionCard"; // Component hiển thị 1 giao dịch
 import { useTransactionsContext } from "../hooks/useTransactions"; // Hook lấy danh sách giao dịch từ API/backend
+import { useTranslation } from 'react-i18next';
 
 const HomeScreen = ({
   isDarkMode = false, // Chế độ tối cho UI
@@ -38,6 +39,8 @@ const HomeScreen = ({
     loading: loadingCategories,
     error: errorCategories,
   } = useCategories();
+
+  const { t } = useTranslation();
 
   // ================== PHẦN LOGIC VÀ HIỂN THỊ ==================
   // Đếm số giao dịch cho từng category để xác định danh mục thường dùng
@@ -73,7 +76,13 @@ const HomeScreen = ({
     displayedCategories = categories;
   }
 
-  // Hàm render các hàng danh mục, mỗi hàng có tối đa CATEGORIES_PER_ROW danh mục
+  /**
+   * Chia danh mục thành các hàng, mỗi hàng tối đa CATEGORIES_PER_ROW danh mục.
+   * Trả về mảng các View, mỗi View là một hàng chứa các TouchableOpacity cho từng category.
+   * Đảm bảo mỗi phần tử con có key duy nhất để React tối ưu render.
+   * @param {Array} list - Danh sách category cần hiển thị
+   * @returns {JSX.Element[]}
+   */
   function renderCategoryRows(list) {
     const rows = [];
     // Chia danh mục thành các hàng
@@ -85,14 +94,12 @@ const HomeScreen = ({
       <View
         key={rowIndex}
         className="flex-row mb-2"
-        style={{
-          justifyContent: "space-between",
-        }}
+        style={{ justifyContent: "space-between" }}
       >
         {/* Render từng danh mục trong hàng */}
         {row.map((category) => (
           <TouchableOpacity
-            key={category._id}
+            key={category._id || category.id}
             className="items-center mb-4"
             style={{ width: 64 }}
             onPress={() => {
@@ -140,7 +147,7 @@ const HomeScreen = ({
           Array.from({ length: CATEGORIES_PER_ROW - row.length }).map(
             (_, idx) => (
               <View
-                key={`empty-${idx}`}
+                key={`empty-${rowIndex}-${idx}`}
                 style={{ width: 64 }}
                 className="mb-4"
               />
@@ -163,7 +170,9 @@ const HomeScreen = ({
     new Animated.Value(Dimensions.get("window").height)
   ).current;
 
-  // Hàm đóng modal danh mục, reset lại các state liên quan
+  /**
+   * Đóng modal danh mục, reset lại các state liên quan và animate slide xuống.
+   */
   const closeModal = () => {
     Animated.timing(slideAnim, {
       toValue: Dimensions.get("window").height,
@@ -200,7 +209,7 @@ const HomeScreen = ({
       >
         <ActivityIndicator size="large" color="#667eea" />
         <Text className={`mt-4 ${isDarkMode ? "text-white" : "text-gray-600"}`}>
-          Đang tải dữ liệu...
+          {t('home.loading')}
         </Text>
       </View>
     );
@@ -220,7 +229,7 @@ const HomeScreen = ({
             isDarkMode ? "text-white" : "text-gray-800"
           }`}
         >
-          Lỗi tải dữ liệu
+          {t('error.loadFailed')}
         </Text>
         <Text
           className={`text-sm text-center mt-2 ${
@@ -255,7 +264,7 @@ const HomeScreen = ({
                 className="text-sm"
                 style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
               >
-                Số dư hiện tại
+                {t('home.balance')}
               </Text>
               <TouchableOpacity onPress={() => setShowBalance((v) => !v)}>
                 <Icon
@@ -280,7 +289,7 @@ const HomeScreen = ({
                   className="text-xs mt-1"
                   style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
                 >
-                  Thu nhập
+                  {t('home.income')}
                 </Text>
                 <Text
                   className="font-medium"
@@ -295,7 +304,7 @@ const HomeScreen = ({
                   className="text-xs mt-1"
                   style={{ color: isDarkMode ? "#ffffff" : "#374151" }}
                 >
-                  Chi tiêu
+                  {t('home.expense')}
                 </Text>
                 <Text
                   className="font-medium"
@@ -334,7 +343,7 @@ const HomeScreen = ({
                     color="#667eea"
                     style={{ marginRight: 8, marginBottom: -2 }}
                   />{" "}
-                  Tất cả danh mục
+                  {t('home.allCategories')}
                 </Text>
                 <TouchableOpacity
                   onPress={() => navigation?.navigate("categories")}
@@ -369,7 +378,7 @@ const HomeScreen = ({
                       color: isDarkMode ? "#d1d5db" : "#667eea",
                     }}
                   >
-                    Quản lý
+                    {t('home.manage')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -417,7 +426,7 @@ const HomeScreen = ({
                       fontSize: 16,
                     }}
                   >
-                    Chi tiêu
+                    {t('home.expenseTab')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -462,7 +471,7 @@ const HomeScreen = ({
                       fontSize: 16,
                     }}
                   >
-                    Thu nhập
+                    {t('home.incomeTab')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -486,7 +495,7 @@ const HomeScreen = ({
                   activeOpacity={0.7}
                 >
                   <Text className="text-blue-600 text-sm font-semibold">
-                    Thu gọn
+                    {t('home.collapse')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -514,7 +523,7 @@ const HomeScreen = ({
                     color="#667eea" // màu chủ đạo
                     style={{ marginRight: 8, marginBottom: -2 }}
                   />{" "}
-                  Danh mục thường dùng
+                  {t('home.frequentCategories')}
                 </Text>
                 <TouchableOpacity
                   onPress={() => navigation?.navigate("categories")}
@@ -549,7 +558,7 @@ const HomeScreen = ({
                       color: isDarkMode ? "#d1d5db" : "#667eea",
                     }}
                   >
-                    Quản lý
+                    {t('home.manage')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -567,7 +576,7 @@ const HomeScreen = ({
                     activeOpacity={0.7}
                   >
                     <Text className="text-blue-600 text-sm font-semibold">
-                      Xem thêm
+                      {t('home.seeMore')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -585,11 +594,13 @@ const HomeScreen = ({
               }`}
             >
               {selectedCategory
-                ? `Giao dịch - ${selectedCategory}`
-                : "Giao dịch gần đây"}
+                ? t('home.transactionsOf', { category: selectedCategory })
+                : t('home.recentTransactions')}
             </Text>
             <TouchableOpacity onPress={onViewAllTransactions}>
-              <Text className="text-blue-600 text-sm">Xem tất cả</Text>
+              <Text className="text-blue-600 text-sm">
+                {t('home.viewAll')}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -605,21 +616,21 @@ const HomeScreen = ({
                   isDarkMode ? "text-gray-400" : "text-gray-500"
                 }`}
               >
-                Chưa có giao dịch nào
+                {t('home.noTransactions')}
               </Text>
               <Text
                 className={`text-sm text-center mt-2 ${
                   isDarkMode ? "text-gray-500" : "text-gray-400"
                 }`}
               >
-                Thêm giao dịch đầu tiên để bắt đầu theo dõi chi tiêu
+                {t('home.addFirstTransaction')}
               </Text>
             </View>
           ) : (
             <View className="space-y-3">
               {recentTransactions.map((transaction) => (
                 <TransactionCard
-                  key={transaction.id}
+                  key={transaction._id || transaction.id}
                   transaction={transaction}
                   isDarkMode={isDarkMode}
                 />
@@ -697,15 +708,14 @@ const HomeScreen = ({
                             isDarkMode ? "text-gray-400" : "text-gray-500"
                           }`}
                         >
-                          Chưa có giao dịch nào
+                          {t('home.noTransactions')}
                         </Text>
                         <Text
                           className={`text-sm text-center mt-2 ${
                             isDarkMode ? "text-gray-500" : "text-gray-400"
                           }`}
                         >
-                          Thêm giao dịch đầu tiên cho danh mục này để bắt đầu
-                          theo dõi chi tiêu
+                          {t('home.addFirstTransactionForCategory')}
                         </Text>
                       </View>
                     );
@@ -716,7 +726,7 @@ const HomeScreen = ({
                         .slice(0, modalTransactionsLimit)
                         .map((transaction) => (
                           <TransactionCard
-                            key={transaction._id}
+                            key={transaction._id || transaction.id}
                             transaction={transaction}
                             isDarkMode={isDarkMode}
                           />
@@ -740,7 +750,7 @@ const HomeScreen = ({
                             activeOpacity={0.7}
                           >
                             <Text className="text-blue-600 text-sm font-semibold">
-                              Tải thêm
+                              {t('home.loadMore')}
                             </Text>
                           </TouchableOpacity>
                         </View>
