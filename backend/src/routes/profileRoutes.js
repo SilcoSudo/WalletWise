@@ -6,6 +6,7 @@ const {
   updateProfile,
   changePassword,
   deleteAccount,
+  deleteAllUserData,
 } = require('../controllers/profileController');
 
 // @route   GET api/profile
@@ -27,5 +28,10 @@ router.put('/change-password', authMiddleware, changePassword);
 // @desc    Delete user account
 // @access  Private
 router.delete('/', authMiddleware, deleteAccount);
+
+// @route   DELETE api/profile/data
+// @desc    Xóa toàn bộ dữ liệu user (KHÔNG xóa tài khoản)
+// @access  Private
+router.delete('/data', authMiddleware, deleteAllUserData);
 
 module.exports = router;

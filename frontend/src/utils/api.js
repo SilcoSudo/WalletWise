@@ -5,7 +5,7 @@
 // - For physical device: 'http://YOUR_COMPUTER_IP:5000/api'
 // - For web: 'http://localhost:5000/api'
 
-const API_BASE_URL = "http://192.168.1.12:5000/api";
+const API_BASE_URL = "http://192.168.242.129:5000/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -203,6 +203,9 @@ export const profileAPI = {
       method: "DELETE",
     }),
 };
+
+// Xóa toàn bộ dữ liệu user (KHÔNG xóa tài khoản)
+export const deleteAllUserData = () => apiRequest("/profile/data", { method: "DELETE" });
 
 // ==== API Báo cáo (Report) ====
 // Lấy danh sách báo cáo

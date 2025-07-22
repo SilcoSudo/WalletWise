@@ -138,7 +138,8 @@
     "ok": "OK",
     "cancel": "Cancel",
     "save": "Save",
-    "back": "Back"
+    "back": "Back",
+    "close": "Close"
   },
   "error": {
     "required": "Please fill in all fields.",
@@ -164,7 +165,8 @@
     "expenseTab": "Expense",
     "incomeTab": "Income",
     "noTransactions": "No transactions yet.",
-    "addFirstTransaction": "Add first transaction"
+    "addFirstTransaction": "Add first transaction",
+    "loadMore": "Load more"
   },
   "transactions": {
     "all": "All",

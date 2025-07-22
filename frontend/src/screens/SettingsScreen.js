@@ -5,10 +5,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../hooks/useAuth";
 import { useTranslation } from 'react-i18next';
 import AvatarPicker from "../components/AvatarPicker";
+import { deleteAllUserData } from '../utils/api';
+import { useTransactionsContext } from '../hooks/useTransactions';
+import { useCategories } from '../hooks/useCategories';
  
  const SettingsScreen = ({ isDarkMode = false, onToggleDarkMode, onLogout, navigation }) => {
    const { t, i18n } = useTranslation();
    const { user, updateUser, deleteUser, updatePassword, updateLanguage, updateNotificationSettings, refreshUserData } = useAuth();
+   const { refreshData } = useTransactionsContext();
+   const { refreshCategories } = useCategories();
 
   // States for modals
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
@@ -68,14 +73,6 @@ import AvatarPicker from "../components/AvatarPicker";
         { icon: "trash-alt", label: t('settings.deleteAllData'), action: "delete", iconColor: "#ef4444", bgColor: "bg-red-100" },
       ],
     },
-    {
-      title: t('settings.support'),
-      items: [
-        { icon: "question-circle", label: t('settings.help'), action: "help" },
-        { icon: "envelope", label: t('settings.contact'), action: "contact" },
-        { icon: "star", label: t('settings.rate'), action: "rate" },
-      ],
-    },
   ];
 
   const handleSettingPress = (action) => {
@@ -94,6 +91,30 @@ import AvatarPicker from "../components/AvatarPicker";
       break;
       case "reports":
         navigation.navigate && navigation.navigate("reports");
+        break;
+      case "delete":
+        Alert.alert(
+          t('settings.confirmDeleteAllTitle') || 'Xác nhận xóa',
+          t('settings.confirmDeleteAllMessage') || 'Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Hành động này không thể hoàn tác.',
+          [
+            { text: t('settings.cancel') || 'Hủy', style: 'cancel' },
+            {
+              text: t('settings.delete') || 'Xóa',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await deleteAllUserData();
+                  Alert.alert(t('settings.success'), t('settings.deleteAllSuccess') || 'Đã xóa toàn bộ dữ liệu!');
+                  refreshUserData && refreshUserData();
+                  refreshData && refreshData();
+                  refreshCategories && refreshCategories();
+                } catch (err) {
+                  Alert.alert(t('settings.error'), err.message || 'Lỗi xóa dữ liệu!');
+                }
+              },
+            },
+          ]
+        );
         break;
       default:
         break;

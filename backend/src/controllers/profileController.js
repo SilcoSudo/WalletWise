@@ -78,3 +78,27 @@ exports.deleteAccount = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Delete all user data (transactions, budgets, categories, reports)
+exports.deleteAllUserData = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const Transaction = require('../models/Transaction');
+    const Budget = require('../models/Budget');
+    const Category = require('../models/Category');
+    const Report = require('../models/Report');
+
+    // Xóa tất cả giao dịch
+    await Transaction.deleteMany({ userId });
+    // Xóa tất cả ngân sách
+    await Budget.deleteMany({ userId });
+    // Xóa tất cả danh mục (trừ mặc định nếu cần)
+    await Category.deleteMany({ userId });
+    // Xóa tất cả báo cáo
+    await Report.deleteMany({ userId });
+
+    res.json({ message: 'Đã xóa toàn bộ dữ liệu người dùng.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi xóa dữ liệu', error: error.message });
+  }
+};
