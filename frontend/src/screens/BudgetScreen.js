@@ -123,15 +123,17 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
    */
   const fetchBudgets = async () => {
     try {
-      const data = await api.budgets.getAll(filter);
-      setBudgets(data);
+      const data = await api.budgets.getAll();
+      // Thêm trường expired vào từng budget
+      const budgetsWithExpired = data.map(b => ({ ...b, expired: isBudgetExpired(b) }));
+      setBudgets(budgetsWithExpired);
 
-      const total = data.reduce((sum, b) => sum + b.limit, 0);
-      const used  = data.reduce((sum, b) => sum + b.spent, 0);
+      const total = budgetsWithExpired.reduce((sum, b) => sum + b.limit, 0);
+      const used  = budgetsWithExpired.reduce((sum, b) => sum + b.spent, 0);
       setSummary({ total, used, remaining: total - used });
 
       // Alert nếu có budget vượt mức và bật cảnh báo
-      data.forEach(b => {
+      budgetsWithExpired.forEach(b => {
         if (b.overLimit && b.alert) {
           Alert.alert(
             'Cảnh báo ngân sách',
@@ -295,6 +297,35 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
     return d;
   }
 
+  // Hàm kiểm tra ngân sách hết hạn
+  function isBudgetExpired(budget) {
+    const start = new Date(budget.createdAt);
+    let expiry = new Date(start);
+    switch (budget.period) {
+      case 'Tuần':
+        expiry.setDate(expiry.getDate() + 7);
+        break;
+      case 'Tháng':
+        expiry.setMonth(expiry.getMonth() + 1);
+        break;
+      case 'Quý':
+        expiry.setMonth(expiry.getMonth() + 3);
+        break;
+      case 'Năm':
+        expiry.setFullYear(expiry.getFullYear() + 1);
+        break;
+      default:
+        break;
+    }
+    return Date.now() > expiry;
+  }
+
+  // Lọc ngân sách theo trạng thái (All, Active, Expired) ở frontend
+  const filteredBudgets =
+    filter === 'All' ? budgets :
+    filter === 'Active' ? budgets.filter(b => !b.expired) :
+    budgets.filter(b => b.expired);
+
   if (loadingCategories) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -306,7 +337,7 @@ export default function BudgetsScreen({ isDarkMode = false, navigation }) {
   return (
     <>
       <FlatList
-        data={budgets}
+        data={filteredBudgets}
         keyExtractor={item => item._id || item.id}
         renderItem={renderBudget}
         ListHeaderComponent={

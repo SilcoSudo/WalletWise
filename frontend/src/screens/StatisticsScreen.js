@@ -70,15 +70,37 @@ const StatisticsScreen = ({ isDarkMode = false }) => {
     categoryData[category] += Math.abs(transaction.amount);
   });
 
+  // Mảng màu đẹp, nhiều màu (ít nhất 100 màu)
+  const COLORS = [
+    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#00B894', '#6C5CE7', '#00B8D4', '#FDCB6E',
+    '#E17055', '#0984E3', '#B2BEC3', '#D35400', '#C0392B', '#8E44AD', '#27AE60', '#2ECC71', '#F67280', '#6C3483',
+    '#F7CAC9', '#92A8D1', '#034F84', '#F7786B', '#B565A7', '#955251', '#009B77', '#DD4124', '#D65076', '#45B8AC',
+    '#EFC050', '#5B5EA6', '#9B2335', '#DFCFBE', '#55B4B0', '#E15D44', '#7FCDCD', '#BC243C', '#C3447A', '#98B4D4',
+    '#FF6F61', '#6B5B95', '#88B04B', '#F7CAC9', '#92A8D1', '#034F84', '#F7786B', '#B565A7', '#955251', '#009B77',
+    '#DD4124', '#D65076', '#45B8AC', '#EFC050', '#5B5EA6', '#9B2335', '#DFCFBE', '#55B4B0', '#E15D44', '#7FCDCD',
+    '#BC243C', '#C3447A', '#98B4D4', '#FF6F61', '#6B5B95', '#88B04B', '#F6E3B4', '#B4E1FA', '#B4B4B4', '#B4F7B4',
+    '#F7B4B4', '#B4B4F7', '#F7F7B4', '#B4F7F7', '#F7B4F7', '#B4B4B4', '#F7E3B4', '#B4E3F7', '#E3B4F7', '#B4F7E3',
+    '#E3F7B4', '#F7B4E3', '#B4E3B4', '#E3B4B4', '#B4B4E3', '#E3E3B4', '#B4E3E3', '#E3B4E3', '#B4B4E3', '#E3B4B4',
+    '#B4E3B4', '#E3B4E3', '#B4E3E3', '#E3E3E3', '#B4B4E3', '#E3B4B4', '#B4E3B4', '#E3B4E3', '#B4E3E3', '#E3E3E3',
+    '#B4B4E3', '#E3B4B4', '#B4E3B4', '#E3B4E3', '#B4E3E3', '#E3E3E3', '#B4B4E3', '#E3B4B4', '#B4E3B4', '#E3B4E3'
+  ];
+
+  // Tạo map: categoryId -> color (ưu tiên color của category, nếu không có thì lấy theo index)
+  const categoryColorMap = {};
+  categories.forEach((cat, idx) => {
+    categoryColorMap[cat.id || cat._id || cat.name] = cat.color || COLORS[idx % COLORS.length];
+  });
+
   // Chuẩn bị dữ liệu cho biểu đồ tròn (pie chart)
   const pieChartData = Object.entries(categoryData).map(([category, amount], index) => {
-    const categoryInfo = categories.find(c => c.id === category) || { name: category, icon: 'receipt' };
-    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'];
+    const categoryInfo = categories.find(c => (c.id || c._id || c.name) === category) || { name: category, icon: 'receipt' };
+    // Lấy màu từ map, nếu không có thì lấy theo index
+    const color = categoryColorMap[category] || COLORS[index % COLORS.length];
     return {
       name: categoryInfo.name,
       amount: amount,
       displayName: `${categoryInfo.name}: ${formatCurrency(amount)}`,
-      color: colors[index % colors.length],
+      color,
       legendFontColor: isDarkMode ? '#FFFFFF' : '#7F7F7F',
       legendFontSize: 12,
     };
