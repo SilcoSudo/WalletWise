@@ -1,0 +1,511 @@
+{
+  "info": {
+    "_postman_id": "walletwise-api-full-collection",
+    "name": "WalletWise API FULL",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Full collection for all WalletWise API endpoints as per user specification. Set {{token}} as your Bearer token."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Đăng ký tài khoản",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Trần Hoàng Quýyyy\",\n  \"email\": \"sirogame002@gmail.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/register", "host": ["http://localhost:5000"], "path": ["api", "auth", "register"] }
+          },
+          "description": "Đăng ký tài khoản mới"
+        },
+        {
+          "name": "Đăng nhập",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sirogame002@gmail.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/login", "host": ["http://localhost:5000"], "path": ["api", "auth", "login"] }
+          },
+          "description": "Đăng nhập"
+        },
+        {
+          "name": "Đăng nhập guest",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "http://localhost:5000/api/auth/guest", "host": ["http://localhost:5000"], "path": ["api", "auth", "guest"] }
+          },
+          "description": "Đăng nhập guest"
+        },
+        {
+          "name": "Xác thực email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sirogame002@gmail.com\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/verify-email", "host": ["http://localhost:5000"], "path": ["api", "auth", "verify-email"] }
+          },
+          "description": "Xác thực email"
+        },
+        {
+          "name": "Quên mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sirogame002@gmail.com\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/forgot-password", "host": ["http://localhost:5000"], "path": ["api", "auth", "forgot-password"] }
+          },
+          "description": "Quên mật khẩu"
+        },
+        {
+          "name": "Đặt lại mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sirogame002@gmail.com\",\n  \"newPassword\": \"654321\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/reset-password", "host": ["http://localhost:5000"], "path": ["api", "auth", "reset-password"] }
+          },
+          "description": "Đặt lại mật khẩu"
+        },
+        {
+          "name": "Đăng xuất",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "http://localhost:5000/api/auth/logout", "host": ["http://localhost:5000"], "path": ["api", "auth", "logout"] }
+          },
+          "description": "Đăng xuất"
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Lấy thông tin người dùng",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/profile", "host": ["http://localhost:5000"], "path": ["api", "profile"] }
+          },
+          "description": "Lấy thông tin người dùng hiện tại"
+        },
+        {
+          "name": "Cập nhật thông tin người dùng",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Trần Hoàng Quýyyy\",\n  \"email\": \"sirogame002@gmail.com\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/profile", "host": ["http://localhost:5000"], "path": ["api", "profile"] }
+          },
+          "description": "Cập nhật thông tin người dùng"
+        },
+        {
+          "name": "Đổi mật khẩu",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"123456\",\n  \"newPassword\": \"654321\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/profile/change-password", "host": ["http://localhost:5000"], "path": ["api", "profile", "change-password"] }
+          },
+          "description": "Đổi mật khẩu"
+        },
+        {
+          "name": "Xóa tài khoản",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/profile", "host": ["http://localhost:5000"], "path": ["api", "profile"] }
+          },
+          "description": "Xóa tài khoản người dùng hiện tại"
+        },
+        {
+          "name": "Xóa toàn bộ dữ liệu user",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/profile/data", "host": ["http://localhost:5000"], "path": ["api", "profile", "data"] }
+          },
+          "description": "Xóa toàn bộ dữ liệu user (giao dịch, ngân sách, danh mục, báo cáo) nhưng không xóa tài khoản"
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Lấy danh sách giao dịch",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/transactions", "host": ["http://localhost:5000"], "path": ["api", "transactions"] }
+          },
+          "description": "Lấy danh sách giao dịch theo ngày, tháng, năm"
+        },
+        {
+          "name": "Tạo giao dịch mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"income\",\n  \"amount\": 100000,\n  \"categoryId\": \"60d0fe4f5311236168a109ca\",\n  \"date\": \"2023-10-27\",\n  \"note\": \"Lương tháng 10\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/transactions", "host": ["http://localhost:5000"], "path": ["api", "transactions"] }
+          },
+          "description": "Tạo giao dịch mới"
+        },
+        {
+          "name": "Lấy chi tiết giao dịch",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/transactions/:id", "host": ["http://localhost:5000"], "path": ["api", "transactions", ":id"] }
+          },
+          "description": "Lấy chi tiết giao dịch theo ID"
+        },
+        {
+          "name": "Cập nhật giao dịch",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"income\",\n  \"amount\": 100000,\n  \"categoryId\": \"60d0fe4f5311236168a109ca\",\n  \"date\": \"2023-10-27\",\n  \"note\": \"Lương tháng 10\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/transactions/:id", "host": ["http://localhost:5000"], "path": ["api", "transactions", ":id"] }
+          },
+          "description": "Cập nhật giao dịch"
+        },
+        {
+          "name": "Xóa giao dịch",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/transactions/:id", "host": ["http://localhost:5000"], "path": ["api", "transactions", ":id"] }
+          },
+          "description": "Xóa giao dịch theo ID"
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Lấy danh sách danh mục",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/categories", "host": ["http://localhost:5000"], "path": ["api", "categories"] }
+          },
+          "description": "Lấy danh sách danh mục thu/chi"
+        },
+        {
+          "name": "Tạo danh mục mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tiền mặt\",\n  \"type\": \"income\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/categories", "host": ["http://localhost:5000"], "path": ["api", "categories"] }
+          },
+          "description": "Tạo danh mục mới"
+        },
+        {
+          "name": "Lấy chi tiết danh mục",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/categories/:id", "host": ["http://localhost:5000"], "path": ["api", "categories", ":id"] }
+          },
+          "description": "Lấy chi tiết danh mục theo ID"
+        },
+        {
+          "name": "Cập nhật danh mục",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tiền mặt\",\n  \"type\": \"income\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/categories/:id", "host": ["http://localhost:5000"], "path": ["api", "categories", ":id"] }
+          },
+          "description": "Cập nhật danh mục"
+        },
+        {
+          "name": "Xóa danh mục",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/categories/:id", "host": ["http://localhost:5000"], "path": ["api", "categories", ":id"] }
+          },
+          "description": "Xóa danh mục theo ID"
+        }
+      ]
+    },
+    {
+      "name": "Budgets",
+      "item": [
+        {
+          "name": "Lấy danh sách ngân sách",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/budgets", "host": ["http://localhost:5000"], "path": ["api", "budgets"] }
+          },
+          "description": "Lấy danh sách ngân sách theo ngày, tháng, năm"
+        },
+        {
+          "name": "Tạo ngân sách mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ngân sách tháng 10\",\n  \"amount\": 5000000,\n  \"categoryId\": \"60d0fe4f5311236168a109ca\",\n  \"date\": \"2023-10-01\",\n  \"note\": \"Ngân sách tháng 10\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/budgets", "host": ["http://localhost:5000"], "path": ["api", "budgets"] }
+          },
+          "description": "Tạo ngân sách mới"
+        },
+        {
+          "name": "Lấy chi tiết ngân sách",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/budgets/:id", "host": ["http://localhost:5000"], "path": ["api", "budgets", ":id"] }
+          },
+          "description": "Lấy chi tiết ngân sách theo ID"
+        },
+        {
+          "name": "Cập nhật ngân sách",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ngân sách tháng 10\",\n  \"amount\": 5000000,\n  \"categoryId\": \"60d0fe4f5311236168a109ca\",\n  \"date\": \"2023-10-01\",\n  \"note\": \"Ngân sách tháng 10\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/budgets/:id", "host": ["http://localhost:5000"], "path": ["api", "budgets", ":id"] }
+          },
+          "description": "Cập nhật ngân sách"
+        },
+        {
+          "name": "Xóa ngân sách",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/budgets/:id", "host": ["http://localhost:5000"], "path": ["api", "budgets", ":id"] }
+          },
+          "description": "Xóa ngân sách theo ID"
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Lấy danh sách báo cáo",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/reports", "host": ["http://localhost:5000"], "path": ["api", "reports"] }
+          },
+          "description": "Lấy danh sách báo cáo của user hiện tại"
+        },
+        {
+          "name": "Tạo báo cáo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Báo cáo tháng 7\",\n  \"startDate\": \"2025-07-01\",\n  \"endDate\": \"2025-07-31\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/reports", "host": ["http://localhost:5000"], "path": ["api", "reports"] }
+          },
+          "description": "Tạo báo cáo mới"
+        },
+        {
+          "name": "Lấy chi tiết báo cáo",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/reports/:id", "host": ["http://localhost:5000"], "path": ["api", "reports", ":id"] }
+          },
+          "description": "Lấy chi tiết báo cáo theo ID"
+        },
+        {
+          "name": "Cập nhật báo cáo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Báo cáo tháng 7 cập nhật\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/reports/:id", "host": ["http://localhost:5000"], "path": ["api", "reports", ":id"] }
+          },
+          "description": "Cập nhật báo cáo theo ID"
+        },
+        {
+          "name": "Xóa báo cáo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/reports/:id", "host": ["http://localhost:5000"], "path": ["api", "reports", ":id"] }
+          },
+          "description": "Xóa báo cáo theo ID"
+        },
+        {
+          "name": "Seed lại dữ liệu báo cáo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/reports/seed", "host": ["http://localhost:5000"], "path": ["api", "reports", "seed"] }
+          },
+          "description": "Seed lại dữ liệu báo cáo (chạy lại seedData.js)"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Lấy cài đặt",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:5000/api/settings", "host": ["http://localhost:5000"], "path": ["api", "settings"] }
+          },
+          "description": "Lấy cài đặt hiện tại"
+        },
+        {
+          "name": "Cập nhật cài đặt",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"VND\",\n  \"theme\": \"light\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/settings", "host": ["http://localhost:5000"], "path": ["api", "settings"] }
+          },
+          "description": "Cập nhật cài đặt"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "token", "value": "" }
+  ]
+} 

@@ -147,23 +147,18 @@ const verifyEmail = async (req, res) => {
 // Forgot password
 const forgotPassword = async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
+    const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Email không tồn tại" });
     }
-    if (!newPassword || newPassword.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự" });
-    }
-    const pendingNewPasswordToken = crypto.randomBytes(32).toString("hex");
-    user.pendingNewPassword = await bcrypt.hash(newPassword, 10);
-    user.pendingNewPasswordToken = pendingNewPasswordToken;
-    user.pendingNewPasswordExpires = Date.now() + 60 * 60 * 1000; // 1h
+    // Tạo token đặt lại mật khẩu
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1h
     await user.save();
-    const verifyLink = `http://${req.headers.host}/api/auth/verify-email?token=${pendingNewPasswordToken}&email=${email}`;
-    await sendVerificationEmail(email, verifyLink);
+    const verifyLink = `http://${req.headers.host}/api/auth/reset-password?token=${resetToken}&email=${email}`;
+    await sendResetPasswordEmail(email, verifyLink);
     res.json({ message: "Đã gửi email xác thực. Vui lòng kiểm tra hộp thư." });
   } catch (error) {
     console.error("Forgot password error:", error);

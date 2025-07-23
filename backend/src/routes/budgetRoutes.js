@@ -9,6 +9,8 @@ router.route('/')
   .get(bc.getBudgets)
   .post(bc.createBudget);
 
+router.get('/:id', authMiddleware, bc.getBudgetById);
+
 router.route('/:id')
   .put(bc.updateBudget)
   .delete(bc.deleteBudget);

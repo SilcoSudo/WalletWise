@@ -6,6 +6,7 @@ const {
   createCategory, // Tạo mới một danh mục
   updateCategory, // Cập nhật thông tin danh mục
   deleteCategory, // Xóa một danh mục
+  getCategoryById, // Lấy chi tiết một danh mục theo ID
 } = require("../controllers/categoryController");
 // Middleware xác thực người dùng (bắt buộc phải đăng nhập mới thao tác được)
 const authMiddleware = require("../middleware/authMiddleware");
@@ -29,6 +30,9 @@ router.put("/:id", authMiddleware, updateCategory);
 // DELETE /api/categories/:id - Xóa một danh mục
 // Chỉ cho phép xóa danh mục của user hiện tại, truyền id qua params
 router.delete("/:id", authMiddleware, deleteCategory);
+
+// GET /api/categories/:id - Lấy chi tiết một danh mục theo ID
+router.get('/:id', authMiddleware, getCategoryById);
 
 // Export router để sử dụng trong server.js
 module.exports = router;

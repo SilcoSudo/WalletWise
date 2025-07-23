@@ -38,7 +38,8 @@ const createTransaction = async (req, res) => {
       categoryDoc = new Category({
         name: category,
         type: type,
-        icon: 'ellipsis-h'
+        icon: 'ellipsis-h',
+        userId: req.user._id // Bổ sung userId
       });
       await categoryDoc.save();
     }
@@ -83,7 +84,8 @@ const updateTransaction = async (req, res) => {
       categoryDoc = new Category({
         name: category,
         type: type,
-        icon: 'ellipsis-h'
+        icon: 'ellipsis-h',
+        userId: req.user._id // Bổ sung userId
       });
       await categoryDoc.save();
     }
@@ -140,9 +142,23 @@ const deleteTransaction = async (req, res) => {
   }
 };
 
+const getTransactionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const transaction = await Transaction.findOne({ _id: id, userId: req.user._id }).populate('categoryId');
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.json(transaction);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getAllTransactions,
   createTransaction,
   updateTransaction,
-  deleteTransaction
+  deleteTransaction,
+  getTransactionById,
 };
