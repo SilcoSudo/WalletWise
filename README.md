@@ -172,31 +172,6 @@ npm run start:frontend
 
 ## 📈 Roadmap
 
-### Phase 1: Core Features ✅
-- [x] Basic UI/UX
-- [x] Navigation system
-- [x] Dark mode
-- [x] Charts và statistics
-- [x] Transaction management
-
-### Phase 2: Backend Integration 🔄
-- [ ] API development
-- [ ] Database setup
-- [ ] Authentication system
-- [ ] Data synchronization
-
-### Phase 3: Advanced Features 📋
-- [ ] Budget management
-- [ ] Export/Import data
-- [ ] Push notifications
-- [ ] Offline support
-- [ ] Multi-currency
-
-### Phase 4: Enhancement 🚀
-- [ ] AI insights
-- [ ] Social features
-- [ ] Advanced analytics
-- [ ] Mobile optimization
 
 ## 🤝 Contributing
 
@@ -212,7 +187,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Your Name**
+**QuyTruong**
 - Email: truongquy445@gmail.com
 - GitHub: [@SilcoSudo](https://github.com/SilcoSudo)
 
